@@ -15,4 +15,5 @@ type Order struct {
 	ID        ID
 	Sum       float64
 	Positions []Position
+	Cashback  uint64
 }

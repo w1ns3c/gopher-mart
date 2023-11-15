@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"gopher-mart/internal/usecase/users"
+	"gopher-mart/internal/domain/users"
 )
 
 type userRepo interface {

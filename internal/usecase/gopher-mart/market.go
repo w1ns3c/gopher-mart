@@ -1,15 +1,11 @@
 package gopher_mart
 
-type Market interface {
-	// users
-	LoginUser()
-	RegisterUser()
+import (
+	"gopher-mart/internal/usecase/orders"
+	"gopher-mart/internal/usecase/users"
+)
 
-	// orders
-	SendOrder()
-	GetAllOrders()
-	GetConfirmedOrders()
-	GetDoneOrders()
-	ConfirmOrder()
-	DoneOrder()
+type MarketUsecase interface {
+	users.UserUsecase
+	orders.OrdersUsecase
 }
