@@ -1,8 +1,14 @@
 package users
 
-import "gopher-mart/internal/domain/users"
+import (
+	"context"
+	"gopher-mart/internal/domain/users"
+)
 
 type UserUsecase interface {
-	LoginUser(users.User) (cookie string, err error)
-	RegisterUser(users.User) error
+	LoginUser(ctx context.Context, user *users.User) (cookie string, err error)
+	RegisterUser(ctx context.Context, user *users.User) error
+}
+
+type Usecase struct {
 }

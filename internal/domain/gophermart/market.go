@@ -1,4 +1,4 @@
-package gophermark
+package gophermart
 
 type Market struct {
 	Salt string
