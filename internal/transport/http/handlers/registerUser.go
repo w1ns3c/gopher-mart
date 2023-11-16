@@ -13,6 +13,10 @@ type RegisterHandler struct {
 	registerUsecase registerUsecase
 }
 
+func NewRegisterHandler(registerUsecase registerUsecase) *RegisterHandler {
+	return &RegisterHandler{registerUsecase: registerUsecase}
+}
+
 type registerUsecase interface {
 	RegisterUser(ctx context.Context, user *users.User) error
 }

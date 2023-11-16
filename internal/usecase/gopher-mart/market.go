@@ -9,3 +9,6 @@ type MarketUsecase interface {
 	users.UserUsecase
 	orders.OrdersUsecase
 }
+
+type Usecase struct {
+}
