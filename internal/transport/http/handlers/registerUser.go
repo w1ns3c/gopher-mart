@@ -1,14 +1,33 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
-	dusers "gopher-mart/internal/domain/users"
-	"gopher-mart/internal/usecase/users"
+	"gopher-mart/internal/domain/localerrors"
+	"gopher-mart/internal/domain/users"
+
 	"net/http"
 )
 
 type RegisterHandler struct {
-	registerUsecase users.UserUsecase
+	registerUsecase registerUsecase
+}
+
+type registerUsecase interface {
+	RegisterUser(ctx context.Context, user *users.User) error
+}
+
+type reqisterRequest struct {
+	Login           string `json:"login"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm"`
+}
+
+func (req *reqisterRequest) ToUser() (*users.User, error) {
+	if req.Password != req.ConfirmPassword {
+		return nil, localerrors.ErrConfirmPassword
+	}
+	return users.NewUser(req.Login, req.Password), nil
 }
 
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -22,14 +41,20 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user dusers.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	var req reqisterRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	err = h.registerUsecase.RegisterUser(user)
+	user, err := req.ToUser()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = h.registerUsecase.RegisterUser(r.Context(), user)
 	if err != nil {
 		w.Write([]byte("login is already used"))
 		w.WriteHeader(http.StatusConflict)
