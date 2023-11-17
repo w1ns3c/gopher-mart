@@ -10,11 +10,11 @@ import (
 )
 
 type RegisterHandler struct {
-	registerUsecase registerUsecase
+	usecase registerUsecase
 }
 
 func NewRegisterHandler(registerUsecase registerUsecase) *RegisterHandler {
-	return &RegisterHandler{registerUsecase: registerUsecase}
+	return &RegisterHandler{usecase: registerUsecase}
 }
 
 type registerUsecase interface {
@@ -58,7 +58,7 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.registerUsecase.RegisterUser(r.Context(), user)
+	err = h.usecase.RegisterUser(r.Context(), user)
 	if err != nil {
 		w.Write([]byte("login is already used"))
 		w.WriteHeader(http.StatusConflict)

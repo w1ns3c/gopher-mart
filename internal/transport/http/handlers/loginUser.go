@@ -8,11 +8,11 @@ import (
 )
 
 type LoginHandler struct {
-	LoginUsecase loginUsecase
+	usecase loginUsecase
 }
 
 func NewLoginHandler(loginUsecase loginUsecase) *LoginHandler {
-	return &LoginHandler{LoginUsecase: loginUsecase}
+	return &LoginHandler{usecase: loginUsecase}
 }
 
 type loginRequest struct {
@@ -47,7 +47,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Login:    req.Login,
 	}
 
-	cookie, err := h.LoginUsecase.LoginUser(r.Context(), user)
+	cookie, err := h.usecase.LoginUser(r.Context(), user)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
