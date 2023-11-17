@@ -11,11 +11,16 @@ func NewRouter(market market.MarketUsecase) error {
 	loginHandler := handlers.NewLoginHandler(market)
 	registerHandler := handlers.NewRegisterHandler(market)
 
+	// orders
+	listOrdersHandler := handlers.NewOrdersListHandler(market)
+
 	router := chi.NewRouter()
 	router.Route("/api", func(r chi.Router) {
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/login", loginHandler.ServeHTTP)
 			r.Post("/register", registerHandler.ServeHTTP)
+
+			r.Get("/orders", listOrdersHandler.ServeHTTP)
 
 		})
 	})

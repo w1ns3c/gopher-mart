@@ -7,8 +7,12 @@ import (
 	"net/http"
 )
 
-type ordersGetHandler struct {
+type ordersListHandler struct {
 	usecase ordersUsecase
+}
+
+func NewOrdersListHandler(usecase ordersUsecase) *ordersListHandler {
+	return &ordersListHandler{usecase: usecase}
 }
 
 type ordersUsecase interface {
@@ -23,7 +27,7 @@ type ordersResponse struct {
 	Date    string             `json:"uploaded_at"`
 }
 
-func (h *ordersGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
