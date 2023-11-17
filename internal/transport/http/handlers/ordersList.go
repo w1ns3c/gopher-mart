@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"gopher-mart/internal/domain/orders"
 	"net/http"
-	"time"
 )
 
 type ordersGetHandler struct {
@@ -12,15 +12,15 @@ type ordersGetHandler struct {
 }
 
 type ordersUsecase interface {
-	// orders MUST be sorted by date
+	// TODO orders MUST be sorted by date, should it be on repo level?
 	ListOrders(ctx context.Context) (orders []orders.Order, err error)
 }
 
-type ordersRequest struct {
-	ID       string             `json:"number"`
-	Status   orders.OrderStatus `json:"status"`
-	Cashbash uint64             `json:"accrual,omitempty"` // accrual
-	Date     time.Time          `json:"uploaded_at"`
+type ordersResponse struct {
+	ID      string             `json:"number"`
+	Status  orders.OrderStatus `json:"status"`
+	Accrual uint64             `json:"accrual,omitempty"` // accrual
+	Date    string             `json:"uploaded_at"`
 }
 
 func (h *ordersGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -36,10 +36,24 @@ func (h *ordersGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// orders not found
-	if len(orders) == 0 {
+	l := len(orders)
+	if l == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
-	// TODO orders or ordersRequest Here
+	resp := make([]ordersResponse, l)
+	for id, order := range orders {
+		resp[id].ID = order.ID
+		resp[id].Status = order.Status
+		resp[id].Accrual = order.Cashback
+		resp[id].Date = order.Date.Format("2006-01-02T15:04:05-07:00")
+	}
+
+	body, err := json.Marshal(resp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(body)
 }

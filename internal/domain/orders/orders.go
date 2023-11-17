@@ -1,8 +1,10 @@
 package orders
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
-type ID string
 type Item struct {
 	ItemID   string
 	ItemCost uint64
@@ -14,11 +16,12 @@ type Position struct {
 }
 
 type Order struct {
-	ID        ID
+	ID        string
 	Sum       float64
 	Positions []Position
 	Cashback  uint64
 	Date      time.Time
+	Status    OrderStatus
 }
 
 type OrderStatus string
@@ -29,3 +32,9 @@ var (
 	StatusInvalid    OrderStatus = "INVALID"    // — система расчёта вознаграждений отказала в расчёте;
 	StatusDone       OrderStatus = "PROCESSED"  // — данные по заказу проверены и информация о расчёте успешно получена.
 )
+
+func ValidateStatus(status string) bool {
+	status = strings.ToTitle(status)
+	return status == string(StatusNew) || status == string(StatusProcessing) ||
+		status == string(StatusInvalid) || status == string(StatusDone)
+}
