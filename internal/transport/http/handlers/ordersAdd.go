@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"gopher-mart/internal/domain/orders"
-	"gopher-mart/internal/domain/users"
+	"gopher-mart/internal/domain/errors"
+	"io"
 	"net/http"
 )
 
@@ -11,13 +11,14 @@ type OrdersAddHandler struct {
 	usecase ordersAddUsecase
 }
 
-type ordersAddUsecase interface {
-	AddOrder(ctx context.Context, order *orders.Order) error
-	ValidateOrder(ctx context.Context, string) (u *users.User, err error)
+func NewOrdersAddHandler(usecase ordersAddUsecase) *OrdersAddHandler {
+	return &OrdersAddHandler{usecase: usecase}
 }
 
-type ordersAddRequest struct {
-	orderNumber stringf
+type ordersAddUsecase interface {
+	//AddOrder(ctx context.Context, order *orders.Order) error
+	AddOrder(ctx context.Context, orderNumber string) error
+	ValidateOrderFormat(ctx context.Context, orderNumber string) error
 }
 
 func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +27,33 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req ordersAddRequest
-	req.cookie, err := r.Cookie()
+	if r.Header.Get("content-type") != "text/plain" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = h.usecase.ValidateOrderFormat(r.Context(), string(body))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = h.usecase.AddOrder(r.Context(), string(body))
+	if err != nil {
+		switch err {
+		case errors.ErrAlreadyExist:
+			w.WriteHeader(http.StatusOK)
+		case errors.ErrCreatedByAnother:
+			w.WriteHeader(http.StatusConflict)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
 }

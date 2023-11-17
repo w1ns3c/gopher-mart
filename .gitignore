@@ -1,2 +1,5 @@
 .idea/
 vendor/
+profile
+*profile*
+*cover*
