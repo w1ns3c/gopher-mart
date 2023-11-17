@@ -13,11 +13,11 @@ type OrdersAddHandler struct {
 
 type ordersAddUsecase interface {
 	AddOrder(ctx context.Context, order *orders.Order) error
-	ValidateOrder(ctx context.Context) (u *users.User, err error)
+	ValidateOrder(ctx context.Context, string) (u *users.User, err error)
 }
 
 type ordersAddRequest struct {
-	cookie string
+	orderNumber stringf
 }
 
 func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
