@@ -10,6 +10,7 @@ type User struct {
 	Login    string // nickname
 	Password string
 	Hash     string
+	Cookie   string
 }
 
 func (u *User) GenerateHash(salt string) (string, error) {
