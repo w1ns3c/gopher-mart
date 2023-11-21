@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
+	"gopher-mart/internal/domain/users"
 	usecaseUsers "gopher-mart/internal/usecase/users"
 	"net/http"
 )
@@ -15,8 +17,12 @@ func NewBalanceHandler(usecase balanceUsecase) *BalanceHandler {
 }
 
 type balanceUsecase interface {
-	GetBalance(ctx context.Context)
+	GetBalance(ctx context.Context, user *users.User) (curBalance, withDrawn int, err error)
 	usecaseUsers.UserContextUsecase
+}
+type responseBalance struct {
+	Current   int `json:"current"`
+	Withdrawn int `json:"withdrawn"`
 }
 
 func (h *BalanceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -25,5 +31,28 @@ func (h *BalanceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	curBalance, withDrawn, err := h.usecase.GetBalance(r.Context(), user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	resp := &responseBalance{
+		Current:   curBalance,
+		Withdrawn: withDrawn,
+	}
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
 
 }
