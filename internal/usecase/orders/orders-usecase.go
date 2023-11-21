@@ -14,15 +14,15 @@ type OrdersUsecase interface {
 	ConfirmOrder()
 	DoneOrder()
 
-	ListOrders(ctx context.Context) (orders []orders.Order, err error)
+	ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error)
 	ValidateOrderFormat(ctx context.Context, orderNumber string) error
-	AddOrder(ctx context.Context, orderNumber string) error
+	AddOrder(ctx context.Context, user *users.User, orderNumber string) error
 }
 
 type Usecase struct {
 }
 
-func (u *Usecase) ListOrders(ctx context.Context) (orders []orders.Order, err error) {
+func (u *Usecase) ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error) {
 	//TODO implement me
 	panic("implement me")
 }

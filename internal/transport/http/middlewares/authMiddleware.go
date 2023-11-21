@@ -19,8 +19,8 @@ type AuthUsecase interface {
 	ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error)
 }
 
-func (m *AuthMiddleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (m *AuthMiddleware) AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		cookie, err := r.Cookie(domain.CookieName)
 		if err != nil {
@@ -36,5 +36,5 @@ func (m *AuthMiddleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc 
 		ctx := context.WithValue(r.Context(), domain.UserContextKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 
-	}
+	})
 }
