@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"gopher-mart/internal/domain/orders"
+	usecaseUsers "gopher-mart/internal/usecase/users"
 	"net/http"
 )
 
@@ -18,6 +19,7 @@ func NewOrdersListHandler(usecase ordersUsecase) *ordersListHandler {
 type ordersUsecase interface {
 	// TODO orders MUST be sorted by date, should it be on repo level?
 	ListOrders(ctx context.Context) (orders []orders.Order, err error)
+	usecaseUsers.UserContextUsecase
 }
 
 type ordersResponse struct {
@@ -28,6 +30,12 @@ type ordersResponse struct {
 }
 
 func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	user, err := h.usecase.CheckUserInContext(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return

@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"gopher-mart/internal/domain/errors"
+	"gopher-mart/internal/domain/users"
+	usecaseUsers "gopher-mart/internal/usecase/users"
 	"io"
 	"net/http"
 )
@@ -17,11 +19,17 @@ func NewOrdersAddHandler(usecase ordersAddUsecase) *OrdersAddHandler {
 
 type ordersAddUsecase interface {
 	//AddOrder(ctx context.Context, order *orders.Order) error
-	AddOrder(ctx context.Context, orderNumber string) error
+	AddOrder(ctx context.Context, user *users.User, orderNumber string) error
 	ValidateOrderFormat(ctx context.Context, orderNumber string) error
+	usecaseUsers.UserContextUsecase
 }
 
 func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	user, err := h.usecase.CheckUserInContext(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -44,7 +52,7 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.usecase.AddOrder(r.Context(), string(body))
+	err = h.usecase.AddOrder(r.Context(), user, string(body))
 	if err != nil {
 		switch err {
 		case errors.ErrAlreadyExist:

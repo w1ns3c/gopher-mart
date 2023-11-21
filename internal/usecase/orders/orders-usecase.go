@@ -3,6 +3,7 @@ package orders
 import (
 	"context"
 	"gopher-mart/internal/domain/orders"
+	"gopher-mart/internal/domain/users"
 )
 
 type OrdersUsecase interface {
@@ -31,7 +32,7 @@ func (u *Usecase) ValidateOrderFormat(ctx context.Context, orderNumber string) e
 	panic("implement me")
 }
 
-func (u *Usecase) AddOrder(ctx context.Context, orderNumber string) error {
+func (u *Usecase) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {
 	//TODO implement me
 	panic("implement me")
 }

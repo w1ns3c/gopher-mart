@@ -16,8 +16,7 @@ func NewAuthMidleware(usecase AuthUsecase) *AuthMiddleware {
 }
 
 type AuthUsecase interface {
-	Auth(ctx context.Context, user *users.User) error
-	GenUserWithCookie(cookie *http.Cookie) *users.User
+	ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error)
 }
 
 func (m *AuthMiddleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
@@ -28,8 +27,7 @@ func (m *AuthMiddleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc 
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		user := m.usecase.GenUserWithCookie(cookie)
-		err = m.usecase.Auth(r.Context(), user)
+		user, err := m.usecase.ValidateCookie(r.Context(), cookie)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
