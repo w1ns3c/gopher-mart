@@ -39,6 +39,7 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 
 			// balance api
 			r.Get("/balance", getBalanceHandler.ServeHTTP)
+			r.Get("/balance/withdraw", balanveWithdrawHandler.ServeHTTP)
 		})
 	})
 

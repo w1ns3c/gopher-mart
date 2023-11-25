@@ -10,4 +10,8 @@ var (
 	// cookie error
 	ErrValueTooLong = errors.New("cookie value too long")
 	ErrInvalidValue = errors.New("invalid cookie value")
+
+	// balance/order WithdrawErrors
+	ErrNotEnoughBonuses = errors.New("user don't have so many bonuses")
+	ErrWrongOrder       = errors.New("wrong ordernumber")
 )
