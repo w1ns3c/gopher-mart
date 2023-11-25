@@ -24,6 +24,7 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 	// balance handlers
 	getBalanceHandler := handlers.NewBalanceHandler(market)
 
+	balanceWithdraw := handlers.NewBalanceWithdrawHandler(market)
 	router := chi.NewRouter()
 	router.Route("/api", func(r chi.Router) {
 		r.Route("/user", func(r chi.Router) {
@@ -39,7 +40,8 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 
 			// balance api
 			r.Get("/balance", getBalanceHandler.ServeHTTP)
-			r.Get("/balance/withdraw", balanveWithdrawHandler.ServeHTTP)
+			r.Post("/balance/withdraw", balanceWithdraw.ServeHTTP)
+
 		})
 	})
 

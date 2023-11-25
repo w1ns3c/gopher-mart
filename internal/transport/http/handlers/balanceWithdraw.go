@@ -14,6 +14,10 @@ type balanceWithdrawHandler struct {
 	usecase balanceWithdrawUsecase
 }
 
+func NewBalanceWithdrawHandler(usecase balanceWithdrawUsecase) *balanceWithdrawHandler {
+	return &balanceWithdrawHandler{usecase: usecase}
+}
+
 type balanceWithdrawUsecase interface {
 	WithdrawBonuses(ctx context.Context, user *users.User, orderNumber string, withdrawBonuses int) error
 	usecaseUsers.UserContextUsecase
