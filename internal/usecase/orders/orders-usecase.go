@@ -4,6 +4,7 @@ import (
 	"context"
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
+	"gopher-mart/internal/domain/withdraws"
 )
 
 type OrdersUsecase interface {
@@ -17,7 +18,7 @@ type OrdersUsecase interface {
 	ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error)
 	ValidateOrderFormat(ctx context.Context, orderNumber string) error
 	AddOrder(ctx context.Context, user *users.User, orderNumber string) error
-	WithdrawBonuses(ctx context.Context, user *users.User, orderNumber string, withdrawBonuses int) error
+	WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error
 }
 
 type Usecase struct {

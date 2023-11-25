@@ -12,5 +12,6 @@ type MarketUsecase interface {
 	orders.OrdersUsecase
 	cookies.CookiesUsecae
 }
+
 type Usecase struct {
 }
