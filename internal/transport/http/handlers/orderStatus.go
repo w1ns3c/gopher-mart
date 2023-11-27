@@ -6,18 +6,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/orders"
+	ordersUsecase "gopher-mart/internal/usecase/orders"
 	"net/http"
 )
 
-type ordersStatusHandler struct {
+type orderStatusHandler struct {
 	usecase getOrderStatusUsecase
 }
 
-func NewOrdersStatusHandler(usecase getOrderStatusUsecase) *ordersStatusHandler {
-	return &ordersStatusHandler{usecase: usecase}
+func NewOrderStatusHandler(usecase getOrderStatusUsecase) *orderStatusHandler {
+	return &orderStatusHandler{usecase: usecase}
 }
 
 type getOrderStatusUsecase interface {
+	ordersUsecase.OrderValidator
 	CheckOrderStatus(ctx context.Context, orderNumber string) (order *orders.Order, err error)
 }
 
@@ -27,9 +29,14 @@ type orderResponse struct {
 	Status  orders.OrderStatus `json:"status"`
 }
 
-func (h *ordersStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *orderStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	orderNum := chi.URLParam(r, "number")
+	if !h.usecase.ValidateOrderFormat(r.Context(), orderNum) {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	order, err := h.usecase.CheckOrderStatus(r.Context(), orderNum)
 	if err != nil {
 		switch err {

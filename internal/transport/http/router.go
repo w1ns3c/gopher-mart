@@ -11,6 +11,7 @@ import (
 func NewRouter(market market.MarketUsecase) http.Handler {
 	// init middlewares
 	authMid := middlewares.NewAuthMidleware(market)
+	ddosMid := middlewares.NewDDOSMiddleware(market.GetMaxRequestsPerMinute())
 
 	// init handlers
 	// login handlers
@@ -20,7 +21,7 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 	// orders handlers
 	listOrdersHandler := handlers.NewOrdersListHandler(market)
 	addOrdersHandler := handlers.NewOrdersAddHandler(market)
-	orderStatusHandler := handlers.NewOrdersStatusHandler(market)
+	orderStatusHandler := handlers.NewOrderStatusHandler(market)
 
 	// balance handlers
 	getBalanceHandler := handlers.NewBalanceHandler(market)
@@ -52,6 +53,7 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 		})
 
 		r.Route("/orders", func(r chi.Router) {
+			r.Use(ddosMid.DDOSMiddleware)
 			r.Get("/{number}", orderStatusHandler.ServeHTTP)
 		})
 

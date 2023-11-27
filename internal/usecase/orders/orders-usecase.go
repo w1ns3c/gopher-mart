@@ -8,15 +8,6 @@ import (
 )
 
 type OrdersUsecase interface {
-	SendOrder()
-	GetAllOrders()
-	GetConfirmedOrders()
-	GetDoneOrders()
-	ConfirmOrder()
-	DoneOrder()
-
-	ValidateOrderFormat(ctx context.Context, orderNumber string) error
-
 	ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error)
 	AddOrder(ctx context.Context, user *users.User, orderNumber string) error
 	CheckOrderStatus(ctx context.Context, orderNumber string) (order *orders.Order, err error)
@@ -31,7 +22,7 @@ func (u *Usecase) ListOrders(ctx context.Context, user *users.User) (orders []or
 	panic("implement me")
 }
 
-func (u *Usecase) ValidateOrderFormat(ctx context.Context, orderNumber string) error {
+func (u *Usecase) ValidateOrderFormat(ctx context.Context, orderNumber string) bool {
 	//TODO implement me
 	panic("implement me")
 }

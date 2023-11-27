@@ -4,6 +4,7 @@ import (
 	"context"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
+	"gopher-mart/internal/usecase/orders"
 	usecaseUsers "gopher-mart/internal/usecase/users"
 	"io"
 	"net/http"
@@ -20,7 +21,7 @@ func NewOrdersAddHandler(usecase ordersAddUsecase) *OrdersAddHandler {
 type ordersAddUsecase interface {
 	//AddOrder(ctx context.Context, order *orders.Order) error
 	AddOrder(ctx context.Context, user *users.User, orderNumber string) error
-	ValidateOrderFormat(ctx context.Context, orderNumber string) error
+	orders.OrderValidator
 	usecaseUsers.UserContextUsecase
 }
 
@@ -46,8 +47,7 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.usecase.ValidateOrderFormat(r.Context(), string(body))
-	if err != nil {
+	if !h.usecase.ValidateOrderFormat(r.Context(), string(body)) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

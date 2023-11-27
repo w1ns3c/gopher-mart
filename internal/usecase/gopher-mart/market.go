@@ -10,6 +10,7 @@ type MarketUsecase interface {
 	users.UserUsecase
 	users.UserBalanceUsecase
 	orders.OrdersUsecase
+	orders.OrderValidator
 	cookies.CookiesUsecae
 }
 

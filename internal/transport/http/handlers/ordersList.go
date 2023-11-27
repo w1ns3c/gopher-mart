@@ -11,14 +11,14 @@ import (
 )
 
 type ordersListHandler struct {
-	usecase ordersUsecase
+	usecase ordersListUsecase
 }
 
-func NewOrdersListHandler(usecase ordersUsecase) *ordersListHandler {
+func NewOrdersListHandler(usecase ordersListUsecase) *ordersListHandler {
 	return &ordersListHandler{usecase: usecase}
 }
 
-type ordersUsecase interface {
+type ordersListUsecase interface {
 	// TODO orders MUST be sorted by date, should it be on repo level?
 	ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error)
 	usecaseUsers.UserContextUsecase
