@@ -20,6 +20,7 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 	// orders handlers
 	listOrdersHandler := handlers.NewOrdersListHandler(market)
 	addOrdersHandler := handlers.NewOrdersAddHandler(market)
+	orderStatusHandler := handlers.NewOrdersStatusHandler(market)
 
 	// balance handlers
 	getBalanceHandler := handlers.NewBalanceHandler(market)
@@ -49,6 +50,11 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 			r.Get("/withdrawals", allUserWithdraws.ServeHTTP)
 
 		})
+
+		r.Route("/orders", func(r chi.Router) {
+			r.Get("/{number}", orderStatusHandler.ServeHTTP)
+		})
+
 	})
 
 	return router

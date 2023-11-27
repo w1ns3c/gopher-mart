@@ -7,6 +7,9 @@ var (
 	ErrAlreadyExist     = errors.New("order number already added by this user")
 	ErrCreatedByAnother = errors.New("order number already added by another user")
 
+	// order status errors
+	ErrOrderNotFound = errors.New("order not found in accounting system")
+
 	// cookie error
 	ErrValueTooLong = errors.New("cookie value too long")
 	ErrInvalidValue = errors.New("invalid cookie value")

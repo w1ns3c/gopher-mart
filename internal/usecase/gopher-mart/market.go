@@ -1,4 +1,4 @@
-package gopher_mart
+package gophermart
 
 import (
 	"gopher-mart/internal/usecase/cookies"
