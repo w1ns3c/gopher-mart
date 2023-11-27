@@ -48,7 +48,7 @@ func (h *BalanceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Withdrawn: withDrawn,
 	}
 
-	data, err := json.Marshal(resp)
+	data, err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

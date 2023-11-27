@@ -75,10 +75,9 @@ func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resp[id].Date = order.Date
 	}
 
-	body, err := json.Marshal(resp)
+	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write(body)
 }

@@ -69,11 +69,10 @@ func (h *withdrawalsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		response[id].Date = one.Date
 	}
 
-	body, err := json.Marshal(response)
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write(body)
 
 }
