@@ -8,16 +8,16 @@ import (
 	"net/http"
 )
 
-type BalanceHandler struct {
+type BalanceStatusHandler struct {
 	usecase balanceUsecase
 }
 
-func NewBalanceHandler(usecase balanceUsecase) *BalanceHandler {
-	return &BalanceHandler{usecase: usecase}
+func NewBalanceHandler(usecase balanceUsecase) *BalanceStatusHandler {
+	return &BalanceStatusHandler{usecase: usecase}
 }
 
 type balanceUsecase interface {
-	GetBalance(ctx context.Context, user *users.User) (curBalance, withDrawn int, err error)
+	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn int, err error)
 	usecaseUsers.UserContextUsecase
 }
 type responseBalance struct {
@@ -25,7 +25,7 @@ type responseBalance struct {
 	Withdrawn int `json:"withdrawn"`
 }
 
-func (h *BalanceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *BalanceStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user, err := h.usecase.CheckUserInContext(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -37,7 +37,7 @@ func (h *BalanceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	curBalance, withDrawn, err := h.usecase.GetBalance(r.Context(), user)
+	curBalance, withDrawn, err := h.usecase.CheckBalance(r.Context(), user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
