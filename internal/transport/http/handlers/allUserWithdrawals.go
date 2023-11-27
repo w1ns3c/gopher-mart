@@ -7,6 +7,7 @@ import (
 	"gopher-mart/internal/domain/withdraws"
 	userUsecase "gopher-mart/internal/usecase/users"
 	"net/http"
+	"time"
 )
 
 type withdrawalsHandler struct {
@@ -22,9 +23,20 @@ type withdrawalsUsecase interface {
 	userUsecase.UserContextUsecase
 }
 type responseWithdrawls struct {
-	OrderID string `json:"order"`
-	Sum     uint64 `json:"sum"`
-	Date    string `json:"processed_at"`
+	OrderID string    `json:"order"`
+	Sum     uint64    `json:"sum"`
+	Date    time.Time `json:"-"`
+}
+
+func (r *responseWithdrawls) MarshalJSON() ([]byte, error) {
+	type Alias responseWithdrawls
+	return json.Marshal(&struct {
+		Date string `json:"processed_at"`
+		*Alias
+	}{
+		r.Date.Format("2006-01-02T15:04:05-07:00"),
+		(*Alias)(r),
+	})
 }
 
 func (h *withdrawalsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +66,7 @@ func (h *withdrawalsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for id, one := range wd {
 		response[id].OrderID = one.OrderID
 		response[id].Sum = one.Sum
-		response[id].Date = one.Date.Format("2006-01-02T15:04:05-07:00")
+		response[id].Date = one.Date
 	}
 
 	body, err := json.Marshal(response)

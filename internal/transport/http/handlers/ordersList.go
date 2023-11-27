@@ -7,6 +7,7 @@ import (
 	"gopher-mart/internal/domain/users"
 	usecaseUsers "gopher-mart/internal/usecase/users"
 	"net/http"
+	"time"
 )
 
 type ordersListHandler struct {
@@ -27,7 +28,18 @@ type ordersResponse struct {
 	ID      string             `json:"number"`
 	Status  orders.OrderStatus `json:"status"`
 	Accrual uint64             `json:"accrual,omitempty"` // accrual
-	Date    string             `json:"uploaded_at"`
+	Date    time.Time          `json:"-"`
+}
+
+func (r *ordersResponse) MarshalJSON() ([]byte, error) {
+	type Alias ordersResponse
+	return json.Marshal(&struct {
+		Date string `json:"uploaded_at"`
+		*Alias
+	}{
+		r.Date.Format("2006-01-02T15:04:05-07:00"),
+		(*Alias)(r),
+	})
 }
 
 func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +72,7 @@ func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resp[id].ID = order.ID
 		resp[id].Status = order.Status
 		resp[id].Accrual = order.Cashback
-		resp[id].Date = order.Date.Format("2006-01-02T15:04:05-07:00")
+		resp[id].Date = order.Date
 	}
 
 	body, err := json.Marshal(resp)
