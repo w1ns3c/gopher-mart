@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func NewRouter(market market.MarketUsecase) http.Handler {
+func NewRouter(market market.MarketUsecaseInf) http.Handler {
 	// init middlewares
 	authMid := middlewares.NewAuthMidleware(market)
 	ddosMid := middlewares.NewDDOSMiddleware(market.GetMaxRequestsPerMinute())

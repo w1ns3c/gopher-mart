@@ -3,6 +3,7 @@ package cookies
 import (
 	"context"
 	"gopher-mart/internal/domain/users"
+	"gopher-mart/internal/repository"
 	"net/http"
 )
 
@@ -11,9 +12,9 @@ type CookiesUsecae interface {
 }
 
 type Usecase struct {
+	storage repository.UserRepoInf
 }
 
 func (u Usecase) ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error) {
-	//TODO implement me
-	panic("implement me")
+	return u.storage.ValidateCookie(ctx, cookie)
 }

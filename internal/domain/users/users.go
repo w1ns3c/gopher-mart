@@ -13,15 +13,19 @@ type User struct {
 	Cookie   string
 }
 
-func (u *User) GenerateHash(salt string) (string, error) {
-	pass := []byte(fmt.Sprintf("%s.%s.%s", salt, u.Password, salt))
+func (u *User) GenerateHash(salt string) error {
+	pass := []byte(fmt.Sprintf("%s.%s.%s%s", salt, u.Password, salt, salt))
 	hash, err := bcrypt.GenerateFromPassword(pass, bcrypt.DefaultCost)
-	return string(hash), err
+	if err != nil {
+		return err
+	}
+	u.Hash = string(hash)
+	return nil
 }
 
-func (u *User) CheckPasswordHash(hash, salt string) bool {
-	pass := []byte(fmt.Sprintf("%s.%s.%s", salt, u.Password, salt))
-	err := bcrypt.CompareHashAndPassword([]byte(hash), pass)
+func (u *User) CheckPasswordHash(salt string) bool {
+	pass := []byte(fmt.Sprintf("%s.%s.%s%s", salt, u.Password, salt, salt))
+	err := bcrypt.CompareHashAndPassword([]byte(u.Hash), pass)
 	return err == nil
 }
 

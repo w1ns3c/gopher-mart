@@ -19,6 +19,7 @@ type UserUsecase interface {
 
 type Usecase struct {
 	storage repository.UserRepoInf
+	Salt    string
 }
 
 func NewUsecase(storage repository.UserRepoInf) *Usecase {
@@ -39,10 +40,22 @@ func (u *Usecase) CheckBalance(ctx context.Context, user *users.User) (curBalanc
 }
 
 func (u *Usecase) LoginUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error) {
-	return u.storage.LoginUser(ctx, user)
+	hash, cookie, err := u.storage.LoginUser(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	user.Hash = hash
+	if !user.CheckPasswordHash(u.Salt) {
+		return nil, errors.ErrUserLogin
+	}
+	return cookie, err
 }
 
 func (u *Usecase) RegisterUser(ctx context.Context, user *users.User) error {
+	err := user.GenerateHash(u.Salt)
+	if err != nil {
+		return err
+	}
 	return u.storage.RegisterUser(ctx, user)
 }
 

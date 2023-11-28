@@ -19,5 +19,6 @@ var (
 	ErrWrongOrder       = errors.New("wrong ordernumber")
 
 	// users
-	ErrUserNotFoundInContext = errors.New("user not in cotext")
+	ErrUserNotFoundInContext = errors.New("user not in context")
+	ErrUserLogin             = errors.New("wrong password")
 )
