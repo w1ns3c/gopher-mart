@@ -40,7 +40,7 @@ func (u *Usecase) CheckBalance(ctx context.Context, user *users.User) (curBalanc
 }
 
 func (u *Usecase) LoginUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error) {
-	hash, cookie, err := u.storage.LoginUser(ctx, user)
+	hash, err := u.storage.LoginUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +48,7 @@ func (u *Usecase) LoginUser(ctx context.Context, user *users.User) (cookie *http
 	if !user.CheckPasswordHash(u.Salt) {
 		return nil, errors.ErrUserLogin
 	}
+
 	return cookie, err
 }
 

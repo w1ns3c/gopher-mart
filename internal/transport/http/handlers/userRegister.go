@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"gopher-mart/internal/domain/localerrors"
+	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
 
 	"net/http"
@@ -22,15 +22,20 @@ type registerUsecase interface {
 }
 
 type reqisterRequest struct {
-	Login           string `json:"login"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirm"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
+	//ConfirmPassword string `json:"confirm"`
+	ConfirmPassword string `json:"-"`
+}
+
+func (req *reqisterRequest) ToUserWithConfirm() (*users.User, error) {
+	if req.Password != req.ConfirmPassword {
+		return nil, errors.ErrConfirmPassword
+	}
+	return users.NewUser(req.Login, req.Password), nil
 }
 
 func (req *reqisterRequest) ToUser() (*users.User, error) {
-	if req.Password != req.ConfirmPassword {
-		return nil, localerrors.ErrConfirmPassword
-	}
 	return users.NewUser(req.Login, req.Password), nil
 }
 

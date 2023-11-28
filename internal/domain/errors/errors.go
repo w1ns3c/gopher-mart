@@ -21,4 +21,9 @@ var (
 	// users
 	ErrUserNotFoundInContext = errors.New("user not in context")
 	ErrUserLogin             = errors.New("wrong password")
+
+	ErrConfirmPassword = errors.New("password not confirmed")
+
+	//
+
 )

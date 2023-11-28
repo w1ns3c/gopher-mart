@@ -9,6 +9,7 @@ import (
 	ordersUsecase "gopher-mart/internal/usecase/orders"
 	usersUsecase "gopher-mart/internal/usecase/users"
 	"net/http"
+	"time"
 )
 
 type MarketUsecaseInf interface {
@@ -22,10 +23,41 @@ type MarketUsecaseInf interface {
 }
 
 type GopherMart struct {
+	Secret          string
+	CookieName      string
+	CookieLifetime  time.Duration
 	cookies         cookies.Usecase
 	users           usersUsecase.Usecase
 	orders          ordersUsecase.Usecase
 	ordersValidator ordersUsecase.OrdersValidator
+}
+
+type MartOptions func(mart *GopherMart)
+
+func NewGophermart(options ...MartOptions) *GopherMart {
+	market := new(GopherMart)
+	for _, option := range options {
+		option(market)
+	}
+	return market
+}
+
+func WithSecret(secret string) func(mart *GopherMart) {
+	return func(mart *GopherMart) {
+		mart.Secret = secret
+	}
+}
+
+func WithCookieName(cookieName string) func(mart *GopherMart) {
+	return func(mart *GopherMart) {
+		mart.CookieName = cookieName
+	}
+}
+
+func WithCookieLifetime(lifetime time.Duration) func(mart *GopherMart) {
+	return func(mart *GopherMart) {
+		mart.CookieLifetime = lifetime
+	}
 }
 
 func (g *GopherMart) LoginUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error) {
@@ -78,8 +110,4 @@ func (g *GopherMart) SetMaxRequestsPerMinute(max uint64) {
 
 func (g *GopherMart) ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error) {
 	return g.cookies.ValidateCookie(ctx, cookie)
-}
-
-func NewGophermart() *GopherMart {
-	return &GopherMart{}
 }
