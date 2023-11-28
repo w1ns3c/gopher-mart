@@ -9,7 +9,6 @@ import (
 )
 
 type UserRepoInf interface {
-	Init(ctx context.Context) error
 	LoginUser(ctx context.Context, user *users.User) (userHash string, err error)
 	RegisterUser(ctx context.Context, user *users.User) error
 	GetUserWithdrawals(ctx context.Context, user *users.User) (wd []withdraws.Withdraw, err error)
