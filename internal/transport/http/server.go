@@ -6,18 +6,21 @@ import (
 )
 
 type HTTPServer struct {
-	addr   *net.TCPAddr
-	router *http.ServeMux
+	*http.Server
 }
 
-func NewHTTPServer(address string, router *http.ServeMux) (srv *HTTPServer, err error) {
+func NewHTTPServer(address string, router http.Handler) (srv *HTTPServer, err error) {
 	addr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
 		return nil, err
 	}
-	return &HTTPServer{addr: addr, router: router}, nil
+	return &HTTPServer{Server: &http.Server{
+		Addr:    addr.String(),
+		Handler: router,
+	}}, nil
+
 }
 
 func (srv *HTTPServer) Run() error {
-	return http.ListenAndServe(srv.addr.String(), srv.router)
+	return srv.ListenAndServe()
 }

@@ -21,7 +21,7 @@ type loginRequest struct {
 }
 
 type loginUsecase interface {
-	LoginUser(ctx context.Context, user *users.User) (cookie string, err error)
+	LoginUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error)
 }
 
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -53,5 +53,5 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("set-cookie", cookie)
+	w.Header().Set("set-cookie", cookie.String())
 }

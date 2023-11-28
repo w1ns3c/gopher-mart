@@ -59,5 +59,5 @@ func NewRouter(market market.MarketUsecase) http.Handler {
 
 	})
 
-	return router
+	return http.Handler(router)
 }

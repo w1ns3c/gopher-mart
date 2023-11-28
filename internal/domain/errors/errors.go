@@ -17,4 +17,7 @@ var (
 	// balance/order WithdrawErrors
 	ErrNotEnoughBonuses = errors.New("user don't have so many bonuses")
 	ErrWrongOrder       = errors.New("wrong ordernumber")
+
+	// users
+	ErrUserNotFoundInContext = errors.New("user not in cotext")
 )
