@@ -37,7 +37,7 @@ func (r *ordersResponse) MarshalJSON() ([]byte, error) {
 		Date string `json:"uploaded_at"`
 		*Alias
 	}{
-		r.Date.Format("2006-01-02T15:04:05-07:00"),
+		r.Date.Format(time.RFC3339),
 		(*Alias)(r),
 	})
 }

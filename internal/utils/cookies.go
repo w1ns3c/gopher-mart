@@ -13,7 +13,7 @@ type Claims struct {
 	UserID uint64
 }
 
-func CreateJWTcookie(userid uint64, secret string, lifetime time.Duration) (cookie *http.Cookie, err error) {
+func CreateJWTcookie(userid uint64, secret string, lifetime time.Duration, cookieName string) (cookie *http.Cookie, err error) {
 	cookieTime := time.Now().Add(lifetime)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -27,7 +27,7 @@ func CreateJWTcookie(userid uint64, secret string, lifetime time.Duration) (cook
 	}
 
 	cookie = &http.Cookie{
-		Name:    domain.CookieName,
+		Name:    cookieName,
 		Value:   jwtToken,
 		Expires: cookieTime,
 
