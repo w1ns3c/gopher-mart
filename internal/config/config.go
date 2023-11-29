@@ -2,7 +2,11 @@ package config
 
 import (
 	"flag"
+	"github.com/joho/godotenv"
+	"gopher-mart/internal/domain"
 	"os"
+	"strconv"
+	"time"
 )
 
 type Config struct {
@@ -43,4 +47,43 @@ func LoadConfig() *Config {
 	}
 
 	return config
+}
+
+func LoadEnvfileConfig() error {
+	if err := godotenv.Load(); err != nil {
+		return err
+	}
+
+	secret, exists := os.LookupEnv("SECRET")
+	if exists {
+		domain.Secret = secret
+	}
+
+	// tables
+	orders, exists := os.LookupEnv("TableOrders")
+	if exists {
+		domain.TableOrders = orders
+	}
+	users, exists := os.LookupEnv("TableUsers")
+	if exists {
+		domain.TableUsers = users
+	}
+	balance, exists := os.LookupEnv("TableBalance")
+	if exists {
+		domain.TableBalance = balance
+	}
+
+	CookieName, exists := os.LookupEnv("CookieName")
+	if exists {
+		domain.CookieName = CookieName
+	}
+	CookieHoursLifeTime, exists := os.LookupEnv("CookieHoursLifeTime")
+	if exists {
+		val, err := strconv.ParseUint(CookieHoursLifeTime, 10, 64)
+		if err != nil {
+			return err
+		}
+		domain.CookieHoursLifeTime = time.Duration(val) * time.Hour
+	}
+	return nil
 }
