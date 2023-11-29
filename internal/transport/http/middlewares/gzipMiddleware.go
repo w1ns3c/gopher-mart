@@ -30,7 +30,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			r.Body = gzipReader
 		}
 
-		// compress it if need
+		// compress
 		if strings.Contains(r.Header.Get("accept-encoding"), "gzip") {
 			gzipW := &gzipWriter{
 				ResponseWriter: w,

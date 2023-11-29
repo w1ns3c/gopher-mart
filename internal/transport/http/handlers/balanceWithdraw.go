@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/domain/withdraws"
@@ -33,6 +34,7 @@ func (h *balanceWithdrawHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	user, err := h.usecase.CheckUserInContext(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
+		log.Err(err).Send()
 		return
 	}
 
@@ -43,6 +45,7 @@ func (h *balanceWithdrawHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 	if r.Header.Get("content-type") != "application/json" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		log.Err(errors.ErrWrongContentType).Send()
 		return
 	}
 
@@ -50,6 +53,7 @@ func (h *balanceWithdrawHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Err(err).Send()
 		return
 	}
 
@@ -66,6 +70,7 @@ func (h *balanceWithdrawHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 	err = h.usecase.WithdrawBonuses(r.Context(), user, wd)
 	if err != nil {
+		log.Err(err).Send()
 		switch err {
 		case errors.ErrNotEnoughBonuses:
 			w.WriteHeader(http.StatusPaymentRequired)

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/usecase/orders"
@@ -28,6 +29,7 @@ type ordersAddUsecase interface {
 func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user, err := h.usecase.CheckUserInContext(r.Context())
 	if err != nil {
+		log.Err(err).Send()
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -37,12 +39,14 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Header.Get("content-type") != "text/plain" {
+		log.Err(errors.ErrWrongContentType).Send()
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		log.Err(err).Send()
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -54,6 +58,7 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = h.usecase.AddOrder(r.Context(), user, string(body))
 	if err != nil {
+		log.Err(err).Send()
 		switch err {
 		case errors.ErrAlreadyExist:
 			w.WriteHeader(http.StatusOK)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/orders"
 	ordersUsecase "gopher-mart/internal/usecase/orders"
@@ -39,6 +40,7 @@ func (h *orderStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	order, err := h.usecase.CheckOrderStatus(r.Context(), orderNum)
 	if err != nil {
+		log.Err(err).Send()
 		switch err {
 		case errors.ErrOrderNotFound:
 			w.WriteHeader(http.StatusNoContent)
@@ -51,8 +53,10 @@ func (h *orderStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp.Accrual = order.Cashback
 	resp.Status = order.Status
 
+	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
+		log.Err(err).Send()
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"net"
 	"net/http"
 )
@@ -21,6 +22,6 @@ func NewHTTPServer(address string, router http.Handler) (srv *HTTPServer, err er
 
 }
 
-func (srv *HTTPServer) Run() error {
+func (srv *HTTPServer) Run(ctx context.Context) error {
 	return srv.ListenAndServe()
 }

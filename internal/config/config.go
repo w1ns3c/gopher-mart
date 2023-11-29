@@ -14,6 +14,7 @@ type Config struct {
 	SrvAddr             string
 	RemoteServiceAddr   string
 	Secret              string
+	LogLevel            string
 	CookieName          string
 	CookieHoursLifeTime time.Duration
 }
@@ -64,7 +65,14 @@ func LoadEnvfileConfig(config *Config) error {
 
 	secret, exists := os.LookupEnv("SECRET")
 	if exists {
-		domain.Secret = secret
+		config.Secret = secret
+	}
+
+	logLvl, exists := os.LookupEnv("LOG_LEVEL")
+	if exists {
+		config.LogLevel = logLvl
+	} else {
+		config.LogLevel = domain.CookieName
 	}
 
 	// tables
@@ -83,17 +91,21 @@ func LoadEnvfileConfig(config *Config) error {
 
 	CookieName, exists := os.LookupEnv("CookieName")
 	if exists {
-		//domain.CookieName = CookieName
 		config.CookieName = CookieName
+	} else {
+		config.CookieName = domain.CookieName
 	}
+
 	CookieHoursLifeTime, exists := os.LookupEnv("CookieHoursLifeTime")
 	if exists {
 		val, err := strconv.ParseUint(CookieHoursLifeTime, 10, 64)
 		if err != nil {
 			return err
 		}
-		//domain.CookieHoursLifeTime = time.Duration(val) * time.Hour
+
 		config.CookieHoursLifeTime = time.Duration(val) * time.Hour
+	} else {
+		config.CookieHoursLifeTime = domain.CookieHoursLifeTime
 	}
 	return nil
 }

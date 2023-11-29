@@ -26,4 +26,8 @@ var (
 
 	// DB
 	ErrWrongResultValues = errors.New("wrong count of results")
+
+	// handlers
+	ErrMethodNotAllowed = errors.New("got not allowed HTTP method")
+	ErrWrongContentType = errors.New("got not allowed content-type")
 )

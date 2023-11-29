@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"github.com/rs/zerolog/log"
+	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
 	usecaseUsers "gopher-mart/internal/usecase/users"
@@ -45,17 +47,20 @@ func (r *ordersResponse) MarshalJSON() ([]byte, error) {
 func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user, err := h.usecase.CheckUserInContext(r.Context())
 	if err != nil {
+		log.Err(err).Send()
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	if r.Method != http.MethodGet {
+		log.Err(errors.ErrMethodNotAllowed).Send()
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
 	orders, err := h.usecase.ListOrders(r.Context(), user)
 	if err != nil {
+		log.Err(err).Send()
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -75,8 +80,10 @@ func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resp[id].Date = order.Date
 	}
 
+	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
+		log.Err(err).Send()
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
