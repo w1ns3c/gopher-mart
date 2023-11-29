@@ -31,6 +31,11 @@ func NewRouter(market market.MarketUsecaseInf) http.Handler {
 	allUserWithdraws := handlers.NewWithdrawalsHandler(market)
 
 	router := chi.NewRouter()
+
+	// use gzip compression
+	router.Use(middlewares.GzipMiddleware)
+
+	// routing
 	router.Route("/api", func(r chi.Router) {
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/login", loginHandler.ServeHTTP)

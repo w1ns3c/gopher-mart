@@ -59,29 +59,16 @@ func (pg *PostgresRepo) RegisterUser(ctx context.Context, user *users.User) erro
 	var (
 		query = fmt.Sprintf("insert into %s (login, hash) values ($1, $2);", domain.TableUsers)
 	)
-	rows, err := pg.db.QueryContext(ctx, query, user.Login, user.Hash)
+	result, err := pg.db.ExecContext(ctx, query, user.Login, user.Hash)
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-	result := make([]string, 0)
-	for rows.Next() {
-		var value string
-		if err := rows.Scan(&value); err != nil {
-			// Check for a scan error.
-			// Query rows will be closed with defer.
-			return err
-		}
-		result = append(result, value)
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
 	}
-	// If the database is being written to ensure to check for Close
-	// errors that may be returned from the driver. The query may
-	// encounter an auto-commit error and be forced to rollback changes.
-	rerr := rows.Close()
-	if rerr != nil {
-		return rerr
+	if rows != 1 {
+		return fmt.Errorf("expected to affect 1 row, affected %d", rows)
 	}
-	// Rows.Err will report the last error encountered by Rows.Scan.
-	err := rows.Err()
 	return err
 }
