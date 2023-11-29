@@ -9,11 +9,12 @@ import (
 
 func main() {
 
-	err := config.LoadEnvfileConfig()
+	conf, err := config.LoadConfig()
 	if err != nil {
+		// TODO log err
 		return
 	}
-	conf := config.LoadConfig()
+
 	repo := postgres.NewRepository(conf.DBurl)
 	market := gophermart.NewGophermart(
 		gophermart.WithRepo(repo),

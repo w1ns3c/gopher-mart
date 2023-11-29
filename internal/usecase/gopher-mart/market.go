@@ -2,6 +2,7 @@ package gophermart
 
 import (
 	"context"
+	"gopher-mart/internal/config"
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/domain/withdraws"
@@ -24,9 +25,15 @@ type MarketUsecaseInf interface {
 }
 
 type GopherMart struct {
-	Secret          string
-	CookieName      string
-	CookieLifetime  time.Duration
+	// optional params
+	Secret         string
+	CookieName     string
+	CookieLifetime time.Duration
+
+	// important params
+	AccrualSystemHost string
+	DBurl             string
+
 	cookies         cookies.Usecase
 	users           usersUsecase.Usecase
 	orders          ordersUsecase.Usecase
@@ -42,6 +49,19 @@ func NewGophermart(options ...MartOptions) *GopherMart {
 		option(market)
 	}
 	return market
+}
+
+func WithConfig(config *config.Config) func(mart *GopherMart) {
+	return func(mart *GopherMart) {
+		// optional params
+		mart.Secret = config.Secret
+		mart.CookieName = config.CookieName
+		mart.CookieLifetime = config.CookieHoursLifeTime
+
+		// important params
+		mart.AccrualSystemHost = config.RemoteServiceAddr
+		mart.DBurl = config.DBurl
+	}
 }
 
 func WithSecret(secret string) func(mart *GopherMart) {

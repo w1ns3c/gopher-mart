@@ -10,19 +10,22 @@ import (
 )
 
 type Config struct {
-	DBurl             string
-	SrvAddr           string
-	RemoteServiceAddr string
+	DBurl               string
+	SrvAddr             string
+	RemoteServiceAddr   string
+	Secret              string
+	CookieName          string
+	CookieHoursLifeTime time.Duration
 }
 
-func LoadConfig() *Config {
+func LoadConfig() (config *Config, err error) {
 	var (
 		envSrvAddr = os.Getenv("RUN_ADDRESS")
 		envDBurl   = os.Getenv("DATABASE_URI")
 		envRSAddr  = os.Getenv("ACCRUAL_SYSTEM_ADDRESS")
 	)
 
-	config := &Config{
+	config = &Config{
 		DBurl:             envDBurl,
 		SrvAddr:           envSrvAddr,
 		RemoteServiceAddr: envRSAddr,
@@ -46,10 +49,15 @@ func LoadConfig() *Config {
 		config.RemoteServiceAddr = flagRSAddr
 	}
 
-	return config
+	err = LoadEnvfileConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return config, err
 }
 
-func LoadEnvfileConfig() error {
+func LoadEnvfileConfig(config *Config) error {
 	if err := godotenv.Load(); err != nil {
 		return err
 	}
@@ -75,7 +83,8 @@ func LoadEnvfileConfig() error {
 
 	CookieName, exists := os.LookupEnv("CookieName")
 	if exists {
-		domain.CookieName = CookieName
+		//domain.CookieName = CookieName
+		config.CookieName = CookieName
 	}
 	CookieHoursLifeTime, exists := os.LookupEnv("CookieHoursLifeTime")
 	if exists {
@@ -83,7 +92,8 @@ func LoadEnvfileConfig() error {
 		if err != nil {
 			return err
 		}
-		domain.CookieHoursLifeTime = time.Duration(val) * time.Hour
+		//domain.CookieHoursLifeTime = time.Duration(val) * time.Hour
+		config.CookieHoursLifeTime = time.Duration(val) * time.Hour
 	}
 	return nil
 }
