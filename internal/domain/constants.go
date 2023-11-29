@@ -1,7 +1,7 @@
 package domain
 
 const (
-	Salt           = "testsalt"
+	Secret         = "topsecret"
 	CookieName     = "jwt"
 	UserContextKey = "user"
 	InvalidUserID  = int64(-1)

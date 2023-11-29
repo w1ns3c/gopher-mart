@@ -20,13 +20,13 @@ type UserUsecase interface {
 }
 
 type Usecase struct {
-	storage        repository.UserRepoInf
+	storage        repository.UsersRepoInf
 	Secret         string
 	CookieName     string
 	CookieLifeTime time.Duration
 }
 
-func NewUsecase(storage repository.UserRepoInf, secret,
+func NewUsecase(storage repository.UsersRepoInf, secret,
 	cookieName string, lifetime time.Duration) *Usecase {
 	return &Usecase{
 		Secret:         secret,

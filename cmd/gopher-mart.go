@@ -1,17 +1,22 @@
 package main
 
 import (
+	"gopher-mart/internal/config"
+	"gopher-mart/internal/repository/postgres"
 	httpserver "gopher-mart/internal/transport/http"
 	gophermart "gopher-mart/internal/usecase/gopher-mart"
 )
 
 func main() {
 
-	address := "localhost:8000"
-	market := gophermart.NewGophermart()
+	conf := config.LoadConfig()
+	repo := postgres.NewRepository(conf.DBurl)
+	market := gophermart.NewGophermart(
+		gophermart.WithRepo(repo),
+	)
 	router := httpserver.NewRouter(market)
 
-	srv, err := httpserver.NewHTTPServer(address, router)
+	srv, err := httpserver.NewHTTPServer(conf.SrvAddr, router)
 	if err != nil {
 		return
 	}

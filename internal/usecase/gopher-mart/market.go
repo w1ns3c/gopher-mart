@@ -5,6 +5,7 @@ import (
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/domain/withdraws"
+	"gopher-mart/internal/repository"
 	"gopher-mart/internal/usecase/cookies"
 	ordersUsecase "gopher-mart/internal/usecase/orders"
 	usersUsecase "gopher-mart/internal/usecase/users"
@@ -30,6 +31,7 @@ type GopherMart struct {
 	users           usersUsecase.Usecase
 	orders          ordersUsecase.Usecase
 	ordersValidator ordersUsecase.OrdersValidator
+	repo            repository.Repository
 }
 
 type MartOptions func(mart *GopherMart)
@@ -57,6 +59,11 @@ func WithCookieName(cookieName string) func(mart *GopherMart) {
 func WithCookieLifetime(lifetime time.Duration) func(mart *GopherMart) {
 	return func(mart *GopherMart) {
 		mart.CookieLifetime = lifetime
+	}
+}
+func WithRepo(repo repository.Repository) func(mart *GopherMart) {
+	return func(mart *GopherMart) {
+		mart.repo = repo
 	}
 }
 

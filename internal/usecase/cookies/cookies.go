@@ -16,7 +16,7 @@ type CookiesUsecae interface {
 
 type Usecase struct {
 	Secret  string
-	storage repository.UserRepoInf
+	storage repository.UsersRepoInf
 }
 
 func (u *Usecase) ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error) {

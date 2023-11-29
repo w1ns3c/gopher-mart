@@ -6,27 +6,11 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain"
-	"strings"
 )
 
 type PostgresRepo struct {
 	db  *sql.DB
 	url string
-}
-
-func NewRepository(url string) *PostgresRepo {
-	if !strings.Contains(url, "postgres://") {
-		url = "postgres://" + url
-	}
-	db, err := sql.Open("pgx", url)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return nil
-	}
-	return &PostgresRepo{
-		db:  db,
-		url: url,
-	}
 }
 
 func (pg *PostgresRepo) CheckConnection(ctx context.Context) error {
@@ -80,7 +64,7 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		upload_date varchar NULL,
 		CONSTRAINT orders_pk PRIMARY KEY (orderid),
 		CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.orders(orderid)
-	);`, domain.TableOrders)
+	);`, domain.TableBalance)
 
 	tx, err := pg.db.Begin()
 	if err != nil {
