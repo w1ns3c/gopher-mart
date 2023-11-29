@@ -24,6 +24,6 @@ var (
 
 	ErrConfirmPassword = errors.New("password not confirmed")
 
-	//
-
+	// DB
+	ErrWrongResultValues = errors.New("wrong count of results")
 )

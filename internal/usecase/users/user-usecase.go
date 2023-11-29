@@ -52,7 +52,7 @@ func (u *Usecase) CheckBalance(ctx context.Context,
 
 func (u *Usecase) LoginUser(ctx context.Context,
 	user *users.User) (cookie *http.Cookie, err error) {
-	hash, err := u.storage.LoginUser(ctx, user)
+	userID, hash, err := u.storage.LoginUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +60,7 @@ func (u *Usecase) LoginUser(ctx context.Context,
 	if !user.CheckPasswordHash(u.Secret) {
 		return nil, errors.ErrUserLogin
 	}
+	user.ID = userID
 	return utils.CreateJWTcookie(user.ID, u.Secret, u.CookieLifeTime, u.CookieName)
 }
 
