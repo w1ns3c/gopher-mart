@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"github.com/rs/zerolog/log"
 	"net"
 	"net/http"
 )
@@ -23,5 +24,8 @@ func NewHTTPServer(address string, router http.Handler) (srv *HTTPServer, err er
 }
 
 func (srv *HTTPServer) Run(ctx context.Context) error {
+	log.Info().
+		Str("addr", srv.Addr).
+		Msg("Server started at:")
 	return srv.ListenAndServe()
 }

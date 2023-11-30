@@ -26,7 +26,7 @@ func NewDDOSMiddleware(maxRequestNum uint64) *ddosMiddleware {
 	}
 }
 
-func (m *ddosMiddleware) DDOSMiddleware(h http.Handler) http.Handler {
+func (m *ddosMiddleware) DDOSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		m.mu.Lock()
 		defer m.mu.Unlock()
@@ -48,5 +48,6 @@ func (m *ddosMiddleware) DDOSMiddleware(h http.Handler) http.Handler {
 			writer.WriteHeader(http.StatusTooManyRequests)
 			return
 		}
+		next.ServeHTTP(writer, request)
 	})
 }

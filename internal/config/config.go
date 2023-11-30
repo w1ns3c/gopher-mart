@@ -33,9 +33,11 @@ func LoadConfig() (config *Config, err error) {
 	}
 
 	var flagSrvAddr, flagDBurl, flagRSAddr string
-	flag.StringVar(&flagSrvAddr, "-a", "127.0.0.1:8000", "address for http server")
-	flag.StringVar(&flagDBurl, "-d", "127.0.0.1:5432", "address for DB postgres")
-	flag.StringVar(&flagRSAddr, "-r", "127.0.0.1:8001", "address for remote accrual system")
+	dbUsage := `URL address for DB postgres
+	Ex. user:password@127.0.0.1:5432`
+	flag.StringVar(&flagSrvAddr, "a", "127.0.0.1:8000", "address for http server")
+	flag.StringVar(&flagDBurl, "d", "127.0.0.1:5432", dbUsage)
+	flag.StringVar(&flagRSAddr, "r", "127.0.0.1:8001", "address for remote accrual system")
 	flag.Parse()
 
 	if config.SrvAddr == "" {
