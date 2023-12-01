@@ -28,10 +28,10 @@ func NewRepository(dbURL string) (repo *PostgresRepo, err error) {
 		db:  db,
 		url: dbURL,
 	}
-	return repo, repo.CheckConnection(context.TODO())
+	return repo, repo.CheckConnection()
 }
 
-func (pg *PostgresRepo) CheckConnection(ctx context.Context) error {
+func (pg *PostgresRepo) CheckConnection() error {
 	var err error
 	log.Info().Str("db_url", pg.url).Send()
 	pg.db, err = sql.Open("pgx", pg.url)
@@ -50,7 +50,7 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 	if pg.db == nil {
 		return fmt.Errorf("db not connected")
 	}
-	err := pg.CheckConnection(ctx)
+	err := pg.CheckConnection()
 	if err != nil {
 		return err
 	}

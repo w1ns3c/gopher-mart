@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/config"
 	"gopher-mart/internal/logger"
@@ -15,15 +14,13 @@ func main() {
 
 	conf, err := config.LoadConfig()
 	if err != nil {
-		// TODO LOG err ?
-		fmt.Println(err)
+		log.Fatal().Err(err).Send()
 		return
 	}
 
 	err = logger.Initialize(conf.LogLevel)
 	if err != nil {
-		// TODO LOG err ?
-		fmt.Println(err)
+		log.Fatal().Err(err).Send()
 		return
 	}
 
