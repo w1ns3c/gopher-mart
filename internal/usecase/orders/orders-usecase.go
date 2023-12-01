@@ -15,22 +15,38 @@ type OrdersUsecaseInf interface {
 	WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error
 }
 
+type Options func(usecase *Usecase)
+
+func NewUsecaseWith(options ...Options) *Usecase {
+	usecase := new(Usecase)
+	for _, option := range options {
+		option(usecase)
+	}
+	return usecase
+}
+
+func WithRepo(repo repository.OrdersRepoInf) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.repo = repo
+	}
+}
+
 type Usecase struct {
-	storage repository.OrdersRepoInf
+	repo repository.OrdersRepoInf
 }
 
 func (u *Usecase) ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error) {
-	return u.storage.ListOrders(ctx, user)
+	return u.repo.ListOrders(ctx, user)
 }
 
 func (u *Usecase) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {
-	return u.storage.AddOrder(ctx, user, orderNumber)
+	return u.repo.AddOrder(ctx, user, orderNumber)
 }
 
 func (u *Usecase) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
-	return u.storage.WithdrawBonuses(ctx, user, withdraw)
+	return u.repo.WithdrawBonuses(ctx, user, withdraw)
 }
 
 func (u *Usecase) CheckOrderStatus(ctx context.Context, orderNumber string) (order *orders.Order, err error) {
-	return u.storage.CheckOrderStatus(ctx, orderNumber)
+	return u.repo.CheckOrderStatus(ctx, orderNumber)
 }

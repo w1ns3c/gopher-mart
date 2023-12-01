@@ -28,11 +28,22 @@ func main() {
 	}
 
 	// initialise all context, service, repo and transport server
+	// init context
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	repo := postgres.NewRepository(conf.DBurl)
+
+	// init repository
+	repo, err := postgres.NewRepository(conf.DBurl)
+	if err != nil {
+		log.Error().Err(err).Msg("Repo init: ")
+		return
+	}
+
+	// init usecases
 	market := gophermart.NewGophermart(
 		gophermart.WithRepo(repo),
+		gophermart.WithConfig(conf),
+		gophermart.InitUsecases(),
 	)
 	router := httpserver.NewRouter(market)
 	srv, err := httpserver.NewHTTPServer(conf.SrvAddr, router)

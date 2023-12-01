@@ -15,6 +15,10 @@ type OrdersValidator struct {
 	MaxRequests uint64
 }
 
+func NewOrdersValidator(max uint64) *OrdersValidator {
+	return &OrdersValidator{MaxRequests: max}
+}
+
 func (validator *OrdersValidator) ValidateOrderFormat(ctx context.Context, orderNumber string) bool {
 	return utils.LuhnValidator(orderNumber)
 }

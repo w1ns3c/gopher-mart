@@ -16,19 +16,19 @@ type PostgresRepo struct {
 	url string
 }
 
-func NewRepository(url string) *PostgresRepo {
-	if !strings.Contains(url, "postgres://") {
-		url = "postgres://" + url
+func NewRepository(dbURL string) (repo *PostgresRepo, err error) {
+	if !strings.Contains(dbURL, "postgres://") {
+		dbURL = "postgres://" + dbURL
 	}
-	db, err := sql.Open("pgx", url)
+	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
-		log.Error().Err(err).Send()
-		return nil
+		return nil, err
 	}
-	return &PostgresRepo{
+	repo = &PostgresRepo{
 		db:  db,
-		url: url,
+		url: dbURL,
 	}
+	return repo, repo.CheckConnection(context.TODO())
 }
 
 func (pg *PostgresRepo) CheckConnection(ctx context.Context) error {

@@ -12,15 +12,17 @@ import (
 	"time"
 )
 
-type UserUsecase interface {
+type UserUsecaseInf interface {
 	LoginUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error)
 	RegisterUser(ctx context.Context, user *users.User) error
 
 	GetUserWithdrawals(ctx context.Context, user *users.User) (wd []withdraws.Withdraw, err error)
+	UserBalanceUsecase
+	UserContextUsecase
 }
 
 type Usecase struct {
-	storage        repository.UsersRepoInf
+	repo           repository.UsersRepoInf
 	Secret         string
 	CookieName     string
 	CookieLifeTime time.Duration
@@ -32,7 +34,41 @@ func NewUsecase(storage repository.UsersRepoInf, secret,
 		Secret:         secret,
 		CookieName:     cookieName,
 		CookieLifeTime: lifetime,
-		storage:        storage,
+		repo:           storage,
+	}
+}
+
+type Options func(usecase *Usecase)
+
+func NewUsecaseWith(options ...Options) *Usecase {
+	usecase := new(Usecase)
+	for _, option := range options {
+		option(usecase)
+	}
+	return usecase
+}
+
+func WithSecret(secret string) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.Secret = secret
+	}
+}
+
+func WithCookieName(cookieName string) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.CookieName = cookieName
+	}
+}
+
+func WithCookieLifetime(cookieLife time.Duration) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.CookieLifeTime = cookieLife
+	}
+}
+
+func WithRepo(repo repository.UsersRepoInf) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.repo = repo
 	}
 }
 
@@ -47,12 +83,12 @@ func (u *Usecase) CheckUserInContext(ctx context.Context) (user *users.User, err
 
 func (u *Usecase) CheckBalance(ctx context.Context,
 	user *users.User) (curBalance, withDrawn int, err error) {
-	return u.storage.CheckBalance(ctx, user)
+	return u.repo.CheckBalance(ctx, user)
 }
 
 func (u *Usecase) LoginUser(ctx context.Context,
 	user *users.User) (cookie *http.Cookie, err error) {
-	userID, hash, err := u.storage.LoginUser(ctx, user)
+	userID, hash, err := u.repo.LoginUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -69,10 +105,10 @@ func (u *Usecase) RegisterUser(ctx context.Context, user *users.User) error {
 	if err != nil {
 		return err
 	}
-	return u.storage.RegisterUser(ctx, user)
+	return u.repo.RegisterUser(ctx, user)
 }
 
 func (u *Usecase) GetUserWithdrawals(ctx context.Context,
 	user *users.User) (wd []withdraws.Withdraw, err error) {
-	return u.storage.GetUserWithdrawals(ctx, user)
+	return u.repo.GetUserWithdrawals(ctx, user)
 }

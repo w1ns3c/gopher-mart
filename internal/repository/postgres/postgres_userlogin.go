@@ -6,7 +6,6 @@ import (
 	"gopher-mart/internal/domain"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
-	"strconv"
 )
 
 func (pg *PostgresRepo) LoginUser(ctx context.Context, user *users.User) (userID uint64, userHash string, err error) {
@@ -18,16 +17,25 @@ func (pg *PostgresRepo) LoginUser(ctx context.Context, user *users.User) (userID
 		return 0, "", err
 	}
 	defer rows.Close()
-	result := make([]string, 0)
+	result := make([]users.User, 0)
+
 	for rows.Next() {
-		var value string
-		if err := rows.Scan(&value); err != nil {
+		var (
+			id          uint64
+			login, hash string
+		)
+
+		if err := rows.Scan(&id, &login, &hash); err != nil {
 			// Check for a scan error.
 			// Query rows will be closed with defer.
 			//log.Fatal(err)
 			return 0, "", err
 		}
-		result = append(result, value)
+		result = append(result, users.User{
+			ID:    id,
+			Login: login,
+			Hash:  hash,
+		})
 	}
 	// If the database is being written to ensure to check for Close
 	// errors that may be returned from the driver. The query may
@@ -41,18 +49,11 @@ func (pg *PostgresRepo) LoginUser(ctx context.Context, user *users.User) (userID
 		return 0, "", rerr
 	}
 
-	if len(result) != 3 {
+	if len(result) != 1 {
 		return 0, "", errors.ErrWrongResultValues
 	}
 
-	userID, err = strconv.ParseUint(result[0], 10, 64)
-	if err != nil {
-		return 0, "", rerr
-	}
-
-	userHash = result[1]
-
-	return userID, userHash, nil
+	return result[0].ID, result[0].Hash, nil
 }
 
 func (pg *PostgresRepo) RegisterUser(ctx context.Context, user *users.User) error {

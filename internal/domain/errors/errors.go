@@ -3,6 +3,9 @@ package errors
 import "errors"
 
 var (
+	// gopher
+	ErrGophermart = errors.New("params not initialized")
+
 	// order add errors
 	ErrAlreadyExist     = errors.New("order number already added by this user")
 	ErrCreatedByAnother = errors.New("order number already added by another user")
@@ -26,6 +29,8 @@ var (
 
 	// DB
 	ErrWrongResultValues = errors.New("wrong count of results")
+	ErrRepoNotInit       = errors.New("repo not initialize")
+	ErrDBConnect         = errors.New("can't connect to datebase")
 
 	// handlers
 	ErrMethodNotAllowed = errors.New("got not allowed HTTP method")

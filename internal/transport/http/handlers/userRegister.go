@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/bcrypt"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
 
@@ -70,8 +71,17 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err = h.usecase.RegisterUser(r.Context(), user)
 	if err != nil {
 		log.Err(err).Send()
-		w.Write([]byte("login is already used"))
-		w.WriteHeader(http.StatusConflict)
+		switch err {
+		case bcrypt.ErrPasswordTooLong:
+			w.Write([]byte("too long password"))
+			w.WriteHeader(http.StatusInternalServerError)
+		case errors.ErrDBConnect:
+			w.Write([]byte(errors.ErrDBConnect.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
+		default:
+			w.Write([]byte("login is already used"))
+			w.WriteHeader(http.StatusConflict)
+		}
 		return
 	}
 
