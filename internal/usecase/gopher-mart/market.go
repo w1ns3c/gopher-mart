@@ -193,10 +193,6 @@ func (g *GopherMart) AddOrder(ctx context.Context, user *users.User, orderNumber
 	return g.orders.AddOrder(ctx, user, orderNumber)
 }
 
-func (g *GopherMart) CheckOrderStatus(ctx context.Context, orderNumber string) (order *orders.Order, err error) {
-	return g.orders.CheckOrderStatus(ctx, orderNumber)
-}
-
 func (g *GopherMart) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
 	return g.orders.WithdrawBonuses(ctx, user, withdraw)
 }

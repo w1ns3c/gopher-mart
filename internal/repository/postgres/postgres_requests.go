@@ -23,11 +23,6 @@ func (pg *PostgresRepo) WithdrawBonuses(ctx context.Context, user *users.User, w
 	panic("implement me")
 }
 
-func (pg *PostgresRepo) CheckOrderStatus(ctx context.Context, orderNumber string) (order *orders.Order, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (pg *PostgresRepo) GetUserWithdrawals(ctx context.Context, user *users.User) (wd []withdraws.Withdraw, err error) {
 	//TODO implement me
 	panic("implement me")
