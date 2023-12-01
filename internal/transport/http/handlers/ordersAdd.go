@@ -51,7 +51,7 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.usecase.ValidateOrderFormat(r.Context(), string(body)) {
+	if !h.usecase.ValidateOrderFormat(string(body)) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

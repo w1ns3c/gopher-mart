@@ -75,7 +75,7 @@ func NewGmartWithConfig(config *config.Config) (mart *GopherMart, err error) {
 	mart.orders = ordersUsecase.NewUsecaseWith(
 		ordersUsecase.WithRepo(mart.repo),
 	)
-
+	mart.ordersValidator = ordersUsecase.NewOrdersValidator()
 	mart.cookies = cookies.NewUsecaseWith(
 		cookies.WithRepo(mart.repo),
 		cookies.WithSecret(mart.Secret),
@@ -201,16 +201,8 @@ func (g *GopherMart) WithdrawBonuses(ctx context.Context, user *users.User, with
 	return g.orders.WithdrawBonuses(ctx, user, withdraw)
 }
 
-func (g *GopherMart) ValidateOrderFormat(ctx context.Context, orderNumber string) bool {
-	return g.ordersValidator.ValidateOrderFormat(ctx, orderNumber)
-}
-
-func (g *GopherMart) GetMaxRequestsPerMinute() uint64 {
-	return g.ordersValidator.GetMaxRequestsPerMinute()
-}
-
-func (g *GopherMart) SetMaxRequestsPerMinute(max uint64) {
-	g.ordersValidator.SetMaxRequestsPerMinute(max)
+func (g *GopherMart) ValidateOrderFormat(orderNumber string) bool {
+	return g.ordersValidator.ValidateOrderFormat(orderNumber)
 }
 
 func (g *GopherMart) ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error) {

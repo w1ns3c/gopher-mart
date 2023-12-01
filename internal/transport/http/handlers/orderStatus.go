@@ -24,17 +24,18 @@ type getOrderStatusUsecase interface {
 	CheckOrderStatus(ctx context.Context, orderNumber string) (order *orders.Order, err error)
 }
 
-type orderResponse struct {
-	ID      string             `json:"order"`
-	Accrual uint64             `json:"accrual"`
-	Status  orders.OrderStatus `json:"status"`
+type OrderResponse struct {
+	ID      string                         `json:"order"`
+	Accrual uint64                         `json:"accrual,omitempty"`
+	Status  orders.AccrualSystemRegistered `json:"status"`
 }
 
 func (h *orderStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	orderNum := chi.URLParam(r, "number")
-	if !h.usecase.ValidateOrderFormat(r.Context(), orderNum) {
+	if !h.usecase.ValidateOrderFormat(orderNum) {
 		w.WriteHeader(http.StatusNoContent)
+		log.Error().Msg("number not in accrual system")
 		return
 	}
 
@@ -48,10 +49,10 @@ func (h *orderStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp orderResponse
+	var resp OrderResponse
 	resp.ID = order.ID
 	resp.Accrual = order.Cashback
-	resp.Status = order.Status
+	resp.Status = orders.AccrualSystemRegistered(order.Status)
 
 	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)

@@ -33,6 +33,15 @@ var (
 	StatusDone       OrderStatus = "PROCESSED"  // — данные по заказу проверены и информация о расчёте успешно получена.
 )
 
+type AccrualSystemRegistered string
+
+var (
+	REGISTERED AccrualSystemRegistered = "REGISTERED"
+	INVALID    AccrualSystemRegistered = "INVALID"
+	PROCESSING AccrualSystemRegistered = "PROCESSING"
+	PROCESSED  AccrualSystemRegistered = "PROCESSED"
+)
+
 func ValidateStatus(status string) bool {
 	status = strings.ToTitle(status)
 	return status == string(StatusNew) || status == string(StatusProcessing) ||
