@@ -48,6 +48,7 @@ func (u *Usecase) ValidateOrderFormat(orderNumber string) bool {
 func (u *Usecase) ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error) {
 	return u.repo.ListOrders(ctx, user)
 }
+
 func (u *Usecase) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {
 	if !u.ValidateOrderFormat(orderNumber) {
 		log.Error().Str("error", "wrong order number format")
@@ -69,6 +70,7 @@ func (u *Usecase) AddOrder(ctx context.Context, user *users.User, orderNumber st
 	return locerrors.ErrOrderAlreadyExist
 }
 
+// TODO
 func (u *Usecase) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
 	err := u.repo.WithdrawBonuses(ctx, user, withdraw)
 	/*
@@ -76,8 +78,8 @@ func (u *Usecase) WithdrawBonuses(ctx context.Context, user *users.User, withdra
 		2. Compare balance with Sum (withdraw request)
 		3. Sub: user_new_balance = user_balance - withdraw
 		4. Save to DB
-		4.1. Save: new balance for user
-		4.2. Save:
+		4.1. Save: new balance and withdraws for user (balance table)
+		4.2. Save: new fields (withdraws) for orders
 
 
 	*/

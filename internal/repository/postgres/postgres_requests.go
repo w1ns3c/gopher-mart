@@ -5,15 +5,9 @@ import (
 	"fmt"
 	"gopher-mart/internal/domain"
 	"gopher-mart/internal/domain/errors"
-	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/domain/withdraws"
 )
-
-func (pg *PostgresRepo) ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error) {
-	//TODO implement me
-	panic("implement me")
-}
 
 func (pg *PostgresRepo) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
 	//TODO implement me

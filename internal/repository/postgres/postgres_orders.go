@@ -2,10 +2,13 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"gopher-mart/internal/domain"
 	"gopher-mart/internal/domain/errors"
+	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
+	"time"
 )
 
 func (pg *PostgresRepo) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {
@@ -60,4 +63,59 @@ func (pg *PostgresRepo) CheckOrder(ctx context.Context, orderNumber string) (ord
 	}
 
 	return result[0].Orderid, result[0].Userid, nil
+}
+
+func (pg *PostgresRepo) ListOrders(ctx context.Context, user *users.User) (result []orders.Order, err error) {
+	var (
+		query = fmt.Sprintf(`
+	SELECT orderid, status, accrual, upload_date
+	FROM %s WHERE userid=$1;
+	`, domain.TableOrders)
+	)
+
+	rows, err := pg.db.QueryContext(ctx, query, user.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result = make([]orders.Order, 0)
+	for rows.Next() {
+		var (
+			order    orders.Order
+			date     sql.NullString
+			status   sql.NullString
+			cashback sql.NullInt32
+		)
+
+		err = rows.Scan(&order.ID, &status, &cashback, &date)
+		if err != nil {
+			return nil, err
+		}
+
+		if date.Valid {
+			t, err := time.Parse(time.RFC3339, date.String)
+			if err != nil {
+				return nil, err
+			}
+			order.Date = t
+		}
+		order.Status = orders.OrderStatus(status.String)
+		// TODO maybe, should use another type (conversion int32 in uint64)
+		order.Cashback = uint64(cashback.Int32)
+
+		result = append(result, order)
+	}
+
+	rerr := rows.Close()
+	if rerr != nil {
+		return nil, err
+	}
+
+	// Rows.Err will report the last error encountered by Rows.Scan.
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
