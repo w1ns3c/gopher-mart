@@ -14,8 +14,8 @@ var (
 	ErrOrderNotFound = errors.New("order not found in accounting system")
 
 	// cookie error
-	ErrValueTooLong = errors.New("cookie value too long")
-	ErrInvalidValue = errors.New("invalid cookie value")
+	ErrValueTooLong  = errors.New("cookie value too long")
+	ErrInvalidCookie = errors.New("invalid cookie")
 
 	// balance/order WithdrawErrors
 	ErrNotEnoughBonuses = errors.New("user don't have so many bonuses")

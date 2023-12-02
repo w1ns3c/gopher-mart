@@ -6,7 +6,7 @@ import (
 )
 
 type UserBalanceUsecase interface {
-	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn int, err error)
+	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn uint64, err error)
 }
 
 type UserContextUsecase interface {

@@ -94,6 +94,7 @@ func LoadEnvfileConfig(config *Config) error {
 	CookieName, exists := os.LookupEnv("CookieName")
 	if exists {
 		config.CookieName = CookieName
+		domain.CookieName = CookieName
 	} else {
 		config.CookieName = domain.CookieName
 	}

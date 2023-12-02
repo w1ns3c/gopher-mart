@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
+	"strings"
 
 	"net/http"
 )
@@ -75,12 +76,14 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case bcrypt.ErrPasswordTooLong:
 			w.Write([]byte("too long password"))
 			w.WriteHeader(http.StatusInternalServerError)
-		case errors.ErrDBConnect:
-			w.Write([]byte(errors.ErrDBConnect.Error()))
-			w.WriteHeader(http.StatusInternalServerError)
 		default:
-			w.Write([]byte("login is already used"))
-			w.WriteHeader(http.StatusConflict)
+			if strings.Contains(err.Error(), "duplicate key value") {
+				w.Write([]byte("login is already used"))
+				w.WriteHeader(http.StatusConflict)
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+
 		}
 		return
 	}

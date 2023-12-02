@@ -19,12 +19,12 @@ func NewBalanceHandler(usecase balanceUsecase) *BalanceStatusHandler {
 }
 
 type balanceUsecase interface {
-	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn int, err error)
+	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn uint64, err error)
 	usecaseUsers.UserContextUsecase
 }
 type responseBalance struct {
-	Current   int `json:"current"`
-	Withdrawn int `json:"withdrawn"`
+	Current   uint64 `json:"current"`
+	Withdrawn uint64 `json:"withdrawn"`
 }
 
 func (h *BalanceStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

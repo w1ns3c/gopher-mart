@@ -30,7 +30,7 @@ func main() {
 	defer cancel()
 
 	// init repository
-	repo, err := postgres.NewRepository(conf.DBurl)
+	repo, err := postgres.NewRepository(conf.DBurl, ctx)
 	if err != nil {
 		log.Error().Err(err).Msg("Repo init: ")
 		return

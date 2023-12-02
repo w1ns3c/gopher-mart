@@ -16,7 +16,7 @@ type PostgresRepo struct {
 	url string
 }
 
-func NewRepository(dbURL string) (repo *PostgresRepo, err error) {
+func NewRepository(dbURL string, ctx context.Context) (repo *PostgresRepo, err error) {
 	if !strings.Contains(dbURL, "postgres://") {
 		dbURL = "postgres://" + dbURL
 	}
@@ -28,7 +28,7 @@ func NewRepository(dbURL string) (repo *PostgresRepo, err error) {
 		db:  db,
 		url: dbURL,
 	}
-	return repo, repo.CheckConnection()
+	return repo, repo.Init(ctx)
 }
 
 func (pg *PostgresRepo) CheckConnection() error {
@@ -57,30 +57,27 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 
 	queryTb1 := fmt.Sprintf(`
     CREATE TABLE IF NOT EXISTS %s (
-		userid integer NOT NULL UNIQUE,
+		userid varchar primary KEY,
 		login varchar NOT NULL UNIQUE,
 		hash varchar NOT NULL,
-		CONSTRAINT users_pk PRIMARY KEY (userid),
 		CONSTRAINT users_fk FOREIGN KEY (userid) REFERENCES public.users(userid)
 	);`, domain.TableUsers)
 
 	queryTb2 := fmt.Sprintf(`
 	CREATE TABLE IF NOT EXISTS %s (
-		userid integer NOT NULL UNIQUE,
+		userid varchar primary KEY,
 		balance integer NULL,
 		withdraw integer NULL,
-		CONSTRAINT balance_pk PRIMARY KEY (userid),
 		CONSTRAINT balance_fk FOREIGN KEY (userid) REFERENCES public.balance(userid)
 	);`, domain.TableOrders)
 
 	queryTb3 := fmt.Sprintf(`
 	CREATE TABLE IF NOT EXISTS %s (
-		orderid integer NOT NULL,
-		userid integer NOT NULL,
+		orderid varchar primary KEY,
+		userid varchar NOT NULL,
 		status varchar NOT NULL,
 		accrual integer NOT NULL,
 		upload_date varchar NULL,
-		CONSTRAINT orders_pk PRIMARY KEY (orderid),
 		CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.orders(orderid)
 	);`, domain.TableBalance)
 
@@ -103,5 +100,5 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		tx.Rollback()
 		return err
 	}
-	return nil
+	return tx.Commit()
 }

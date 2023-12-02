@@ -82,7 +82,7 @@ func (u *Usecase) CheckUserInContext(ctx context.Context) (user *users.User, err
 }
 
 func (u *Usecase) CheckBalance(ctx context.Context,
-	user *users.User) (curBalance, withDrawn int, err error) {
+	user *users.User) (curBalance, withDrawn uint64, err error) {
 	return u.repo.CheckBalance(ctx, user)
 }
 
@@ -105,6 +105,7 @@ func (u *Usecase) RegisterUser(ctx context.Context, user *users.User) error {
 	if err != nil {
 		return err
 	}
+	user.GenerateID(u.Secret)
 	return u.repo.RegisterUser(ctx, user)
 }
 

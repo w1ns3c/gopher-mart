@@ -42,6 +42,8 @@ type GopherMart struct {
 	orders          *ordersUsecase.Usecase
 	ordersValidator *ordersUsecase.OrdersValidator
 	repo            repository.Repository
+
+	ctx context.Context
 }
 
 // TODO Choose constructor
@@ -58,7 +60,7 @@ func NewGmartWithConfig(config *config.Config) (mart *GopherMart, err error) {
 	}
 
 	// initialize repo
-	repo, err := postgres.NewRepository(mart.dbURL)
+	repo, err := postgres.NewRepository(mart.dbURL, context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -107,6 +109,12 @@ func WithConfig(config *config.Config) func(mart *GopherMart) {
 		mart.AccrualSystemHost = config.RemoteServiceAddr
 		mart.dbURL = config.DBurl
 
+	}
+}
+
+func WithContext(ctx context.Context) func(mart *GopherMart) {
+	return func(mart *GopherMart) {
+		mart.ctx = ctx
 	}
 }
 
@@ -177,7 +185,7 @@ func (g *GopherMart) GetUserWithdrawals(ctx context.Context, user *users.User) (
 	return g.users.GetUserWithdrawals(ctx, user)
 }
 
-func (g *GopherMart) CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn int, err error) {
+func (g *GopherMart) CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn uint64, err error) {
 	return g.users.CheckBalance(ctx, user)
 }
 

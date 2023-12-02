@@ -2,8 +2,7 @@ package cookies
 
 import (
 	"context"
-	"gopher-mart/internal/domain"
-	"gopher-mart/internal/domain/errors"
+	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/repository"
 	"gopher-mart/internal/utils"
@@ -20,12 +19,15 @@ type Usecase struct {
 }
 
 func (u *Usecase) ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error) {
-	userID := utils.CheckJWTcookie(cookie, u.Secret)
-	if userID == domain.InvalidUserID {
-		return nil, errors.ErrInvalidValue
-	}
-	user, err = u.repo.CheckUserExist(ctx, cookie)
+	userID, err := utils.CheckJWTcookie(cookie, u.Secret)
 	if err != nil {
+		log.Error().Err(err).Send()
+		return nil, err
+	}
+
+	user, err = u.repo.CheckUserExist(ctx, userID)
+	if err != nil {
+		log.Error().Err(err).Send()
 		return nil, err
 	}
 
