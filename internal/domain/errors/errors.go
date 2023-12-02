@@ -1,6 +1,8 @@
 package errors
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	// gopher
@@ -20,8 +22,7 @@ var (
 	ErrInvalidCookie = errors.New("invalid cookie")
 
 	// balance/order WithdrawErrors
-	ErrNotEnoughBonuses = errors.New("user don't have so many bonuses")
-	ErrWrongOrder       = errors.New("wrong ordernumber")
+	ErrNotEnoughBonuses = errors.New("user have not enough bonuses")
 
 	// users
 	ErrUserNotFoundInContext = errors.New("user not in context")

@@ -19,7 +19,7 @@ func NewBalanceHandler(usecase balanceUsecase) *BalanceStatusHandler {
 }
 
 type balanceUsecase interface {
-	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn uint64, err error)
+	CheckBalance(ctx context.Context, user *users.User) (balance *users.Balance, err error)
 	usecaseUsers.UserContextUsecase
 }
 type responseBalance struct {
@@ -41,7 +41,7 @@ func (h *BalanceStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	curBalance, withDrawn, err := h.usecase.CheckBalance(r.Context(), user)
+	curBalance, err := h.usecase.CheckBalance(r.Context(), user)
 	if err != nil {
 		log.Err(err).Send()
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,8 +49,8 @@ func (h *BalanceStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	}
 
 	resp := &responseBalance{
-		Current:   curBalance,
-		Withdrawn: withDrawn,
+		Current:   curBalance.Current,
+		Withdrawn: curBalance.WithdrawsSum,
 	}
 
 	w.Header().Set("content-type", "application/json")

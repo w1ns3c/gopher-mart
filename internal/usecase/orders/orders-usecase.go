@@ -7,7 +7,6 @@ import (
 	locerrors "gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
-	"gopher-mart/internal/domain/withdraws"
 	"gopher-mart/internal/repository"
 	"gopher-mart/internal/utils"
 )
@@ -15,7 +14,6 @@ import (
 type OrdersUsecaseInf interface {
 	ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error)
 	AddOrder(ctx context.Context, user *users.User, orderNumber string) error
-	WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error
 }
 type OrderValidator interface {
 	ValidateOrderFormat(orderNumber string) bool
@@ -68,21 +66,4 @@ func (u *Usecase) AddOrder(ctx context.Context, user *users.User, orderNumber st
 	}
 
 	return locerrors.ErrOrderAlreadyExist
-}
-
-// TODO
-func (u *Usecase) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
-	err := u.repo.WithdrawBonuses(ctx, user, withdraw)
-	/*
-		1. Request user balance
-		2. Compare balance with Sum (withdraw request)
-		3. Sub: user_new_balance = user_balance - withdraw
-		4. Save to DB
-		4.1. Save: new balance and withdraws for user (balance table)
-		4.2. Save: new fields (withdraws) for orders
-
-
-	*/
-
-	return err
 }

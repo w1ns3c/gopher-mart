@@ -21,7 +21,7 @@ func NewBalanceWithdrawHandler(usecase balanceWithdrawUsecase) *balanceWithdrawH
 }
 
 type balanceWithdrawUsecase interface {
-	WithdrawBonuses(ctx context.Context, user *users.User, wd *withdraws.Withdraw) error
+	WithdrawUserBonuses(ctx context.Context, user *users.User, wd *withdraws.Withdraw) error
 	usecaseUsers.UserContextUsecase
 }
 
@@ -68,14 +68,16 @@ func (h *balanceWithdrawHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = h.usecase.WithdrawBonuses(r.Context(), user, wd)
+	err = h.usecase.WithdrawUserBonuses(r.Context(), user, wd)
 	if err != nil {
 		log.Err(err).Send()
 		switch err {
 		case errors.ErrNotEnoughBonuses:
 			w.WriteHeader(http.StatusPaymentRequired)
-		case errors.ErrWrongOrder:
+		case errors.ErrOrderWrongFormat:
 			w.WriteHeader(http.StatusUnprocessableEntity)
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}

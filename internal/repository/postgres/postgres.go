@@ -16,6 +16,8 @@ type PostgresRepo struct {
 	url string
 }
 
+
+
 func NewRepository(dbURL string, ctx context.Context) (repo *PostgresRepo, err error) {
 	if !strings.Contains(dbURL, "postgres://") {
 		dbURL = "postgres://" + dbURL

@@ -25,6 +25,8 @@ type MarketUsecaseInf interface {
 	ordersUsecase.OrdersUsecaseInf
 	ordersUsecase.OrderValidator
 	cookies.CookiesUsecae
+
+	WithdrawUserBonuses(ctx context.Context, user *users.User, wd *withdraws.Withdraw) error
 }
 
 type GopherMart struct {
@@ -183,7 +185,7 @@ func (g *GopherMart) GetUserWithdrawals(ctx context.Context, user *users.User) (
 	return g.users.GetUserWithdrawals(ctx, user)
 }
 
-func (g *GopherMart) CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn uint64, err error) {
+func (g *GopherMart) CheckBalance(ctx context.Context, user *users.User) (balance *users.Balance, err error) {
 	return g.users.CheckBalance(ctx, user)
 }
 
@@ -199,8 +201,39 @@ func (g *GopherMart) AddOrder(ctx context.Context, user *users.User, orderNumber
 	return g.orders.AddOrder(ctx, user, orderNumber)
 }
 
-func (g *GopherMart) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
-	return g.orders.WithdrawBonuses(ctx, user, withdraw)
+func (g *GopherMart) WithdrawUserBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
+	/*
+		1. Request user balance
+		2. Compare balance with Sum (withdraw request)
+		3. Save to DB
+		3.1. Save: new fields (withdraws) for orders
+		3.2. Save: new balance and withdraws for user (balance table)
+	*/
+
+	// request balance
+	balance, err := g.users.CheckBalance(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	// compare balances
+	if balance.Current < withdraw.Sum {
+		log.Warn().Str("user", user.Login).Send()
+		return errors.ErrNotEnoughBonuses
+	}
+
+	// 3.1 save withdraw for order
+	err = g.repo.WithdrawBonuses(ctx, user, withdraw)
+	if err != nil {
+		//log.Error().Err(err).Send()
+		return errors.ErrOrderWrongFormat
+	}
+
+	// 3.2 change balance
+	balance.Current -= withdraw.Sum
+	balance.WithdrawsSum += withdraw.Sum
+
+	return g.repo.UpdateBalance(ctx, user, balance)
 }
 
 func (g *GopherMart) ValidateOrderFormat(orderNumber string) bool {
@@ -209,4 +242,8 @@ func (g *GopherMart) ValidateOrderFormat(orderNumber string) bool {
 
 func (g *GopherMart) ValidateCookie(ctx context.Context, cookie *http.Cookie) (user *users.User, err error) {
 	return g.cookies.ValidateCookie(ctx, cookie)
+}
+
+func (g *GopherMart) UpdateBalance(ctx context.Context, user *users.User, balance *users.Balance) error {
+	return g.users.UpdateBalance(ctx, user, balance)
 }

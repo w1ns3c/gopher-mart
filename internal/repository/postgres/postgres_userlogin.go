@@ -80,7 +80,6 @@ func (pg *PostgresRepo) RegisterUser(ctx context.Context, user *users.User) erro
 		return err
 	}
 	return tx.Commit()
-
 }
 
 func (pg *PostgresRepo) CheckUserExist(ctx context.Context, userID string) (user *users.User, err error) {

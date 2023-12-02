@@ -5,7 +5,7 @@ profile
 *cover*
 
 .env
-tests
+tests.md
 gopher-mart
 gophermart
 main

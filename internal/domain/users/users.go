@@ -42,3 +42,10 @@ func (u *User) GenerateID(salt string) {
 	hash := md5.Sum([]byte(fmt.Sprintf("%s.%s.%s", salt, u.Login, salt)))
 	u.ID = hex.EncodeToString(hash[:])
 }
+
+
+
+type Balance struct {
+	Current      uint64
+	WithdrawsSum uint64
+}

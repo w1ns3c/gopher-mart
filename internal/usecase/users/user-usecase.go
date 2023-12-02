@@ -81,11 +81,6 @@ func (u *Usecase) CheckUserInContext(ctx context.Context) (user *users.User, err
 	return user, nil
 }
 
-func (u *Usecase) CheckBalance(ctx context.Context,
-	user *users.User) (curBalance, withDrawn uint64, err error) {
-	return u.repo.CheckBalance(ctx, user)
-}
-
 func (u *Usecase) LoginUser(ctx context.Context,
 	user *users.User) (cookie *http.Cookie, err error) {
 	userID, hash, err := u.repo.LoginUser(ctx, user)
