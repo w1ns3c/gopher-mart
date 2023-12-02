@@ -11,4 +11,5 @@ type OrdersRepoInf interface {
 	ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error)
 	AddOrder(ctx context.Context, user *users.User, orderNumber string) error
 	WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error
+	CheckOrder(ctx context.Context, orderNumber string) (orderid, userid string, err error)
 }

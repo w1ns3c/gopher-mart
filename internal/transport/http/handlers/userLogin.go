@@ -42,7 +42,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		log.Err(err).Send()
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -53,13 +53,8 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := h.usecase.LoginUser(r.Context(), user)
 	if err != nil {
-		log.Err(err).Send()
-		switch err {
-		case errors.ErrWrongResultValues:
-			w.WriteHeader(http.StatusInternalServerError)
-		default:
-			w.WriteHeader(http.StatusUnauthorized)
-		}
+		log.Err(err).Msg("wrong credentials")
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

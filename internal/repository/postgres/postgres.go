@@ -69,17 +69,17 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		balance integer NULL,
 		withdraw integer NULL,
 		CONSTRAINT balance_fk FOREIGN KEY (userid) REFERENCES public.balance(userid)
-	);`, domain.TableOrders)
+	);`, domain.TableBalance)
 
 	queryTb3 := fmt.Sprintf(`
 	CREATE TABLE IF NOT EXISTS %s (
 		orderid varchar primary KEY,
 		userid varchar NOT NULL,
-		status varchar NOT NULL,
-		accrual integer NOT NULL,
-		upload_date varchar NULL,
+		status varchar ,
+		accrual integer,
+		upload_date varchar,
 		CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.orders(orderid)
-	);`, domain.TableBalance)
+	);`, domain.TableOrders)
 
 	tx, err := pg.db.Begin()
 	if err != nil {

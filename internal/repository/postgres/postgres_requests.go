@@ -15,11 +15,6 @@ func (pg *PostgresRepo) ListOrders(ctx context.Context, user *users.User) (order
 	panic("implement me")
 }
 
-func (pg *PostgresRepo) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (pg *PostgresRepo) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
 	//TODO implement me
 	panic("implement me")

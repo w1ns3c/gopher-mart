@@ -51,19 +51,16 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.usecase.ValidateOrderFormat(string(body)) {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	err = h.usecase.AddOrder(r.Context(), user, string(body))
 	if err != nil {
 		log.Err(err).Send()
 		switch err {
-		case errors.ErrAlreadyExist:
+		case errors.ErrOrderAlreadyExist:
 			w.WriteHeader(http.StatusOK)
-		case errors.ErrCreatedByAnother:
+		case errors.ErrOrderCreatedByAnother:
 			w.WriteHeader(http.StatusConflict)
+		case errors.ErrOrderWrongFormat:
+			w.WriteHeader(http.StatusBadRequest)
 		}
 		return
 	}

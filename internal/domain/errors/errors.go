@@ -7,8 +7,10 @@ var (
 	ErrGophermart = errors.New("params not initialized")
 
 	// order add errors
-	ErrAlreadyExist     = errors.New("order number already added by this user")
-	ErrCreatedByAnother = errors.New("order number already added by another user")
+	ErrOrderAlreadyExist     = errors.New("order number already added by this user")
+	ErrOrderCreatedByAnother = errors.New("order number already added by another user")
+	ErrOrderWrongFormat      = errors.New("order has wrong number")
+	ErrOrderNotExist         = errors.New("order not exist")
 
 	// order status errors
 	ErrOrderNotFound = errors.New("order not found in accounting system")
