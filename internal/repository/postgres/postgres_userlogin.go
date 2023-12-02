@@ -12,7 +12,7 @@ import (
 func (pg *PostgresRepo) LoginUser(ctx context.Context, user *users.User) (userID string, userHash string, err error) {
 	var (
 		query = fmt.Sprintf("SELECT userid, login, hash"+
-			"FROM %s where login=$1;", domain.TableUsers)
+			" FROM %s where login=$1;", domain.TableUsers)
 	)
 	rows, err := pg.db.QueryContext(ctx, query, user.Login)
 	if err != nil {
@@ -60,9 +60,9 @@ func (pg *PostgresRepo) LoginUser(ctx context.Context, user *users.User) (userID
 
 func (pg *PostgresRepo) RegisterUser(ctx context.Context, user *users.User) error {
 	var (
-		query1 = fmt.Sprintf("insert into %s (userid, login, hash)"+
+		query1 = fmt.Sprintf("insert into %s (userid, login, hash) "+
 			"values ($1, $2, $3);", domain.TableUsers)
-		query2 = fmt.Sprintf("insert into %s (userid, balance, withdraw)"+
+		query2 = fmt.Sprintf("insert into %s (userid, balance, withdraw) "+
 			"values ($1,0,0);", domain.TableBalance)
 	)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*8)
@@ -85,7 +85,7 @@ func (pg *PostgresRepo) RegisterUser(ctx context.Context, user *users.User) erro
 
 func (pg *PostgresRepo) CheckUserExist(ctx context.Context, userID string) (user *users.User, err error) {
 	var (
-		query = fmt.Sprintf("SELECT userid, login"+
+		query = fmt.Sprintf("SELECT userid, login "+
 			"FROM %s where userid=$1;", domain.TableUsers)
 	)
 	rows, err := pg.db.QueryContext(ctx, query, userID)

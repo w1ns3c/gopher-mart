@@ -74,7 +74,7 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		"userid varchar NOT NULL,"+
 		"status varchar ,"+
 		"accrual integer,"+
-		"upload_date varchar,"+
+		"upload_date timestamptz not NULL,"+
 		"CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.orders(orderid));", domain.TableOrders)
 
 	tx, err := pg.db.Begin()
