@@ -13,16 +13,18 @@ import (
 
 func (pg *PostgresRepo) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {
 	var (
-		query = fmt.Sprintf("INSERT INTO %s (orderid, userid) values ($1, $2)", domain.TableOrders)
+		query = fmt.Sprintf("INSERT INTO %s (orderid, userid, status)"+
+			" values ($1, $2, $3)", domain.TableOrders)
 	)
 
-	_, err := pg.db.ExecContext(ctx, query, orderNumber, user.ID)
+	_, err := pg.db.ExecContext(ctx, query, orderNumber, user.ID, orders.StatusNew)
 	return err
 }
 
 func (pg *PostgresRepo) CheckOrder(ctx context.Context, orderNumber string) (orderid, userid string, err error) {
 	var (
-		query = fmt.Sprintf("SELECT orderid, userid FROM %s where orderid=$1;", domain.TableOrders)
+		query = fmt.Sprintf("SELECT orderid, userid FROM %s"+
+			"where orderid=$1;", domain.TableOrders)
 	)
 
 	rows, err := pg.db.QueryContext(ctx, query, orderNumber)
@@ -67,10 +69,8 @@ func (pg *PostgresRepo) CheckOrder(ctx context.Context, orderNumber string) (ord
 
 func (pg *PostgresRepo) ListOrders(ctx context.Context, user *users.User) (result []orders.Order, err error) {
 	var (
-		query = fmt.Sprintf(`
-	SELECT orderid, status, accrual, upload_date
-	FROM %s WHERE userid=$1;
-	`, domain.TableOrders)
+		query = fmt.Sprintf("SELECT orderid, status, accrual, upload_date"+
+			"FROM %s WHERE userid=$1;", domain.TableOrders)
 	)
 
 	rows, err := pg.db.QueryContext(ctx, query, user.ID)

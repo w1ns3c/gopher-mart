@@ -55,31 +55,27 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		return err
 	}
 
-	queryTb1 := fmt.Sprintf(`
-    CREATE TABLE IF NOT EXISTS %s (
-		userid varchar primary KEY,
-		login varchar NOT NULL UNIQUE,
-		hash varchar NOT NULL,
-		CONSTRAINT users_fk FOREIGN KEY (userid) REFERENCES public.users(userid)
-	);`, domain.TableUsers)
+	queryTb1 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ("+
+		"userid varchar primary KEY,"+
+		"login varchar NOT NULL UNIQUE,"+
+		"hash varchar NOT NULL,"+
+		"CONSTRAINT users_fk FOREIGN KEY (userid) REFERENCES public.users(userid));",
+		domain.TableUsers)
 
-	queryTb2 := fmt.Sprintf(`
-	CREATE TABLE IF NOT EXISTS %s (
-		userid varchar primary KEY,
-		balance integer NULL,
-		withdraw integer NULL,
-		CONSTRAINT balance_fk FOREIGN KEY (userid) REFERENCES public.balance(userid)
-	);`, domain.TableBalance)
+	queryTb2 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ("+
+		"userid varchar primary KEY,"+
+		"balance integer NULL,"+
+		"withdraw integer NULL,"+
+		"CONSTRAINT balance_fk FOREIGN KEY (userid) REFERENCES public.balance(userid));",
+		domain.TableBalance)
 
-	queryTb3 := fmt.Sprintf(`
-	CREATE TABLE IF NOT EXISTS %s (
-		orderid varchar primary KEY,
-		userid varchar NOT NULL,
-		status varchar ,
-		accrual integer,
-		upload_date varchar,
-		CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.orders(orderid)
-	);`, domain.TableOrders)
+	queryTb3 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s "+
+		"(orderid varchar primary KEY,"+
+		"userid varchar NOT NULL,"+
+		"status varchar ,"+
+		"accrual integer,"+
+		"upload_date varchar,"+
+		"CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.orders(orderid));", domain.TableOrders)
 
 	tx, err := pg.db.Begin()
 	if err != nil {
