@@ -16,6 +16,7 @@ import (
 type AccrualsInf interface {
 	CheckAccruals(ctx context.Context)
 	SaveAccruals(ctx context.Context, ch chan *accruals.Accrual)
+	GetProcessingOrders(ctx context.Context, ordersCh chan string) error
 }
 
 type Usecase struct {
@@ -23,14 +24,54 @@ type Usecase struct {
 	Addr string
 
 	// worker pool
-	WorkersCount int
-	Attempts     int
+	WorkersCount uint
+	Attempts     uint
 
 	// repository
 	repo repository.AccrualsRepoInf
 
 	// TickerTimer
 	timer time.Duration
+}
+
+type AccrualsOptions func(usecase *Usecase)
+
+func NewAccrualsWith(options ...AccrualsOptions) *Usecase {
+	usecase := new(Usecase)
+	for _, option := range options {
+		option(usecase)
+	}
+	return usecase
+}
+
+func WithRepo(repo repository.AccrualsRepoInf) func(usecase *Usecase) {
+	return func(usecase *Usecase) {
+		usecase.repo = repo
+	}
+}
+
+func WithAddr(addr string) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.Addr = addr
+	}
+}
+
+func WithWorkersCount(count uint) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.WorkersCount = count
+	}
+}
+
+func WithAttempts(attempts uint) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.Attempts = attempts
+	}
+}
+
+func WithTimer(timer time.Duration) func(u *Usecase) {
+	return func(u *Usecase) {
+		u.timer = timer
+	}
 }
 
 func (u *Usecase) CheckAccruals(ctx context.Context) {
@@ -76,13 +117,13 @@ func (u *Usecase) GetAccrualsFromRemote(ctx context.Context,
 
 	accrualsCh := make(chan *accruals.Accrual)
 
-	for id := 0; id < u.WorkersCount; id++ {
+	for id := uint(0); id < u.WorkersCount; id++ {
 		go u.accrualWorker(ctx, id, ordersID, accrualsCh)
 	}
 	return accrualsCh
 }
 
-func (u *Usecase) accrualWorker(ctx context.Context, workerID int,
+func (u *Usecase) accrualWorker(ctx context.Context, workerID uint,
 	ordersID chan string, accrualsCh chan *accruals.Accrual) {
 
 	for orderID := range ordersID {
@@ -119,8 +160,8 @@ func (u *Usecase) createRequest(ctx context.Context, orderID string,
 	return nil
 }
 
-func retry(f func() error, attempts int, retryableErrors ...error) {
-	for i := 0; i < attempts; i++ {
+func retry(f func() error, attempts uint, retryableErrors ...error) {
+	for i := uint(0); i < attempts; i++ {
 		err := f()
 		if err != nil {
 			for _, e := range retryableErrors {

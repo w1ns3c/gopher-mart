@@ -17,6 +17,9 @@ type Config struct {
 	LogLevel            string
 	CookieName          string
 	CookieHoursLifeTime time.Duration
+	WorkersCount        uint
+	RetryTimer          time.Duration
+	RetryAttempts       uint
 }
 
 func LoadConfig() (config *Config, err error) {
@@ -93,6 +96,42 @@ func LoadEnvfileConfig(config *Config) error {
 	withdraws, exists := os.LookupEnv("TableWithdraws")
 	if exists {
 		domain.TableWithdraws = withdraws
+	}
+
+	val, exists := os.LookupEnv("WorkersCount")
+	if exists {
+		WorkersCount, err := strconv.ParseUint(val, 10, 32)
+		if err != nil {
+			WorkersCount = uint64(domain.WorkersCount)
+		}
+		config.WorkersCount = uint(WorkersCount)
+		domain.WorkersCount = uint(WorkersCount)
+	} else {
+		config.WorkersCount = domain.WorkersCount
+	}
+
+	val, exists = os.LookupEnv("RetryTimer")
+	if exists {
+		RetryTimer, err := strconv.ParseUint(val, 10, 32)
+		if err != nil {
+			return err
+		}
+		config.RetryTimer = time.Duration(RetryTimer) * time.Second
+		domain.RetryTimer = config.RetryTimer
+	} else {
+		config.RetryTimer = domain.RetryTimer
+	}
+
+	val, exists = os.LookupEnv("RetryAttempts")
+	if exists {
+		RetryAttempts, err := strconv.ParseUint(val, 10, 32)
+		if err != nil {
+			return err
+		}
+		config.RetryAttempts = uint(RetryAttempts)
+		domain.RetryAttempts = uint(RetryAttempts)
+	} else {
+		config.RetryAttempts = domain.RetryAttempts
 	}
 
 	CookieName, exists := os.LookupEnv("CookieName")

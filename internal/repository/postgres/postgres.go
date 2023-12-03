@@ -31,6 +31,10 @@ func NewRepository(dbURL string, ctx context.Context) (repo *PostgresRepo, err e
 	return repo, repo.Init(ctx)
 }
 
+func (pg *PostgresRepo) Close() error {
+	return pg.db.Close()
+}
+
 func (pg *PostgresRepo) CheckConnection() error {
 	var err error
 	log.Info().Str("db_url", pg.url).Send()

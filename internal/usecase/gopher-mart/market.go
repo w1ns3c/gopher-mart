@@ -4,12 +4,14 @@ import (
 	"context"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/config"
+	"gopher-mart/internal/domain/accruals"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/domain/withdraws"
 	"gopher-mart/internal/repository"
 	"gopher-mart/internal/repository/postgres"
+	accrualsUsecase "gopher-mart/internal/usecase/accruals"
 	"gopher-mart/internal/usecase/cookies"
 	ordersUsecase "gopher-mart/internal/usecase/orders"
 	usersUsecase "gopher-mart/internal/usecase/users"
@@ -19,12 +21,10 @@ import (
 
 type MarketUsecaseInf interface {
 	usersUsecase.UserUsecaseInf
-	//usersUsecase.UserBalanceUsecase
-	//usersUsecase.UserContextUsecase
-
 	ordersUsecase.OrdersUsecaseInf
 	ordersUsecase.OrderValidator
 	cookies.CookiesUsecae
+	accrualsUsecase.AccrualsInf
 
 	WithdrawUserBonuses(ctx context.Context, user *users.User, wd *withdraws.Withdraw) error
 }
@@ -35,14 +35,19 @@ type GopherMart struct {
 	CookieName     string
 	CookieLifetime time.Duration
 
+	WorkersCount uint
+	RetryTimer   time.Duration
+	Attempts     uint
+
 	// important params
 	AccrualSystemHost string
 	dbURL             string
 
-	cookies *cookies.Usecase
-	users   *usersUsecase.Usecase
-	orders  *ordersUsecase.Usecase
-	repo    repository.Repository
+	cookies  *cookies.Usecase
+	users    *usersUsecase.Usecase
+	orders   *ordersUsecase.Usecase
+	accruals *accrualsUsecase.Usecase
+	repo     repository.Repository
 
 	ctx context.Context
 }
@@ -106,10 +111,13 @@ func WithConfig(config *config.Config) func(mart *GopherMart) {
 		mart.CookieName = config.CookieName
 		mart.CookieLifetime = config.CookieHoursLifeTime
 
+		mart.WorkersCount = config.WorkersCount
+		mart.RetryTimer = config.RetryTimer
+		mart.Attempts = config.RetryAttempts
+
 		// important params
 		mart.AccrualSystemHost = config.RemoteServiceAddr
 		mart.dbURL = config.DBurl
-
 	}
 }
 
@@ -136,6 +144,7 @@ func WithCookieLifetime(lifetime time.Duration) func(mart *GopherMart) {
 		mart.CookieLifetime = lifetime
 	}
 }
+
 func WithRepo(repo repository.Repository) func(mart *GopherMart) {
 	return func(mart *GopherMart) {
 		mart.repo = repo
@@ -167,6 +176,14 @@ func InitUsecases() func(mart *GopherMart) {
 		mart.cookies = cookies.NewUsecaseWith(
 			cookies.WithRepo(mart.repo),
 			cookies.WithSecret(mart.Secret),
+		)
+
+		mart.accruals = accrualsUsecase.NewAccrualsWith(
+			accrualsUsecase.WithAddr(mart.AccrualSystemHost),
+			accrualsUsecase.WithRepo(mart.repo),
+			accrualsUsecase.WithTimer(mart.RetryTimer),
+			accrualsUsecase.WithWorkersCount(mart.WorkersCount),
+			accrualsUsecase.WithAttempts(mart.Attempts),
 		)
 
 	}
@@ -247,4 +264,26 @@ func (g *GopherMart) ValidateCookie(ctx context.Context, cookie *http.Cookie) (u
 
 func (g *GopherMart) UpdateBalance(ctx context.Context, user *users.User, balance *users.Balance) error {
 	return g.users.UpdateBalance(ctx, user, balance)
+}
+
+func (g *GopherMart) CheckAccruals(ctx context.Context) {
+	g.accruals.CheckAccruals(ctx)
+}
+
+func (g *GopherMart) SaveAccruals(ctx context.Context, ch chan *accruals.Accrual) {
+	g.accruals.SaveAccruals(ctx, ch)
+}
+func (g *GopherMart) GetProcessingOrders(ctx context.Context, ordersCh chan string) error {
+	return g.accruals.GetProcessingOrders(ctx, ordersCh)
+}
+
+// TOOD fill close func
+func (g *GopherMart) Close() error {
+	err := g.repo.Close()
+	if err != nil {
+		log.Error().Err(err).Msg("DB can't be close ... ")
+		return err
+	}
+	log.Info().Msg("DB closed")
+	return nil
 }

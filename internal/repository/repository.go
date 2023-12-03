@@ -11,8 +11,11 @@ import (
 type Repository interface {
 	Init(ctx context.Context) error
 	CheckConnection() error
+	Close() error
+
 	OrdersRepoInf
 	UsersRepoInf
+	AccrualsRepoInf
 }
 
 type OrdersRepoInf interface {
