@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"gopher-mart/internal/domain/accruals"
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/domain/withdraws"
@@ -33,4 +34,9 @@ type UsersRepoInf interface {
 type BalanceRepoInf interface {
 	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn uint64, err error)
 	UpdateBalance(ctx context.Context, user *users.User, balance *users.Balance) error
+}
+
+type AccrualsRepoInf interface {
+	UpdateAccrual(ctx context.Context, accrual *accruals.Accrual) error
+	GetProccessingOrders(ctx context.Context) (ordersID []string, err error)
 }

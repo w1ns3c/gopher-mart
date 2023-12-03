@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
+	"gopher-mart/internal/domain/accruals"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/orders"
 	ordersUsecase "gopher-mart/internal/usecase/orders"
@@ -25,9 +26,9 @@ type getOrderStatusUsecase interface {
 }
 
 type OrderResponse struct {
-	ID      string                         `json:"order"`
-	Accrual uint64                         `json:"accrual,omitempty"`
-	Status  orders.AccrualSystemRegistered `json:"status"`
+	ID      string                           `json:"order"`
+	Accrual uint64                           `json:"accrual,omitempty"`
+	Status  accruals.AccrualSystemRegistered `json:"status"`
 }
 
 func (h *orderStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +53,7 @@ func (h *orderStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var resp OrderResponse
 	resp.ID = order.ID
 	resp.Accrual = order.Cashback
-	resp.Status = orders.AccrualSystemRegistered(order.Status)
+	resp.Status = accruals.AccrualSystemRegistered(order.Status)
 
 	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)

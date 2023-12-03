@@ -15,7 +15,9 @@ var (
 	ErrOrderNotExist         = errors.New("order not exist")
 
 	// order status errors
-	ErrOrderNotFound = errors.New("order not found in accounting system")
+	ErrOrderNotFound      = errors.New("order not found in accounting system")
+	ErrAccrualsNotUpdated = errors.New("accruals info not updated")
+	ErrTooManyRequests    = errors.New("too many requests")
 
 	// cookie error
 	ErrValueTooLong  = errors.New("cookie value too long")

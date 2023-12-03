@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"gopher-mart/internal/domain/accruals"
 	"gopher-mart/internal/domain/orders"
 	"gopher-mart/internal/transport/http/handlers"
 	"gopher-mart/internal/transport/http/middlewares"
@@ -41,37 +42,37 @@ func main() {
 	orders := []handlers.OrderResponse{
 		{
 			ID:     "18",
-			Status: orders.PROCESSING,
+			Status: accruals.PROCESSING,
 		},
 		{
 			ID:      "26",
-			Status:  orders.PROCESSED,
+			Status:  accruals.PROCESSED,
 			Accrual: 100,
 		},
 		{
 			ID:     "109",
-			Status: orders.INVALID,
+			Status: accruals.INVALID,
 		},
 		{
 			ID:      "901",
-			Status:  orders.PROCESSED,
+			Status:  accruals.PROCESSED,
 			Accrual: 200,
 		},
 		{
 			ID:     "9084",
-			Status: orders.PROCESSING,
+			Status: accruals.PROCESSING,
 		},
 		{
 			ID:     "234567",
-			Status: orders.PROCESSING,
+			Status: accruals.PROCESSING,
 		},
 		{
 			ID:     "123455",
-			Status: orders.REGISTERED,
+			Status: accruals.REGISTERED,
 		},
 		{
 			ID:     "1234566",
-			Status: orders.INVALID,
+			Status: accruals.INVALID,
 		},
 	}
 	usecase := &withdrawUsecae{orders: orders}
