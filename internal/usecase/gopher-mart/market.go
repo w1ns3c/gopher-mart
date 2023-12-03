@@ -65,6 +65,7 @@ func NewGmartWithConfig(config *config.Config) (mart *GopherMart, err error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Info().Str("dbUrl", mart.dbURL).Msg("DB connected")
 	mart.repo = repo
 
 	// initialize usecases

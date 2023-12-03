@@ -44,7 +44,7 @@ func (u *Usecase) ValidateOrderFormat(orderNumber string) bool {
 }
 
 func (u *Usecase) ListOrders(ctx context.Context, user *users.User) (orders []orders.Order, err error) {
-	return u.repo.ListOrders(ctx, user)
+	return u.repo.GetUserOrders(ctx, user)
 }
 
 func (u *Usecase) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {

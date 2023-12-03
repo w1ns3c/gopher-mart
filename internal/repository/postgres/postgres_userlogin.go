@@ -73,10 +73,12 @@ func (pg *PostgresRepo) RegisterUser(ctx context.Context, user *users.User) erro
 	}
 	_, err = tx.ExecContext(ctx, query1, user.ID, user.Login, user.Hash)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	_, err = tx.ExecContext(ctx, query2, user.ID)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	return tx.Commit()

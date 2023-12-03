@@ -90,6 +90,10 @@ func LoadEnvfileConfig(config *Config) error {
 	if exists {
 		domain.TableBalance = balance
 	}
+	withdraws, exists := os.LookupEnv("TableWithdraws")
+	if exists {
+		domain.TableWithdraws = withdraws
+	}
 
 	CookieName, exists := os.LookupEnv("CookieName")
 	if exists {

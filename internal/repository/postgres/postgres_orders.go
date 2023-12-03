@@ -13,17 +13,34 @@ import (
 
 func (pg *PostgresRepo) AddOrder(ctx context.Context, user *users.User, orderNumber string) error {
 	var (
-		query = fmt.Sprintf("INSERT INTO %s (orderid, userid, status, upload_date) "+
+		queryOrders = fmt.Sprintf("INSERT INTO %s (orderid, userid, status, upload_date) "+
 			"values ($1, $2, $3, $4)", domain.TableOrders)
+		queryWithdraws = fmt.Sprintf("INSERT INTO %s (orderid, userid) "+
+			"values ($1, $2)", domain.TableWithdraws)
 	)
 
 	now := time.Now()
-	_, err := pg.db.ExecContext(ctx, query, orderNumber, user.ID,
+	tx, err := pg.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, queryOrders, orderNumber, user.ID,
 		orders.StatusNew, now)
-	return err
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	_, err = tx.ExecContext(ctx, queryWithdraws, orderNumber, user.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }
 
-func (pg *PostgresRepo) ListOrders(ctx context.Context, user *users.User) (result []orders.Order, err error) {
+func (pg *PostgresRepo) GetUserOrders(ctx context.Context, user *users.User) (result []orders.Order, err error) {
 	var (
 		query = fmt.Sprintf("SELECT orderid, status, accrual, upload_date "+
 			"FROM %s WHERE userid=$1 ORDER BY upload_date DESC;", domain.TableOrders)

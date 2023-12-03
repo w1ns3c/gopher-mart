@@ -16,8 +16,6 @@ type PostgresRepo struct {
 	url string
 }
 
-
-
 func NewRepository(dbURL string, ctx context.Context) (repo *PostgresRepo, err error) {
 	if !strings.Contains(dbURL, "postgres://") {
 		dbURL = "postgres://" + dbURL
@@ -61,15 +59,15 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		"userid varchar primary KEY,"+
 		"login varchar NOT NULL UNIQUE,"+
 		"hash varchar NOT NULL,"+
-		"CONSTRAINT users_fk FOREIGN KEY (userid) REFERENCES public.users(userid));",
-		domain.TableUsers)
+		"CONSTRAINT users_fk FOREIGN KEY (userid) REFERENCES public.%s(userid));",
+		domain.TableUsers, domain.TableUsers)
 
 	queryTb2 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ("+
 		"userid varchar primary KEY,"+
 		"balance integer NULL,"+
 		"withdraw integer NULL,"+
-		"CONSTRAINT balance_fk FOREIGN KEY (userid) REFERENCES public.balance(userid));",
-		domain.TableBalance)
+		"CONSTRAINT balance_fk FOREIGN KEY (userid) REFERENCES public.%s(userid));",
+		domain.TableBalance, domain.TableBalance)
 
 	queryTb3 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s "+
 		"(orderid varchar primary KEY,"+
@@ -77,7 +75,15 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		"status varchar ,"+
 		"accrual integer,"+
 		"upload_date timestamptz not NULL,"+
-		"CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.orders(orderid));", domain.TableOrders)
+		"CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.%s(orderid));",
+		domain.TableOrders, domain.TableOrders)
+
+	queryTb4 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ("+
+		"orderid varchar primary KEY,"+
+		"userid varchar NOT NULL,"+
+		"withdraw integer,"+
+		"processed_at timestamptz,"+
+		"CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.%s(orderid));", domain.TableWithdraws, domain.TableWithdraws)
 
 	tx, err := pg.db.Begin()
 	if err != nil {
@@ -94,6 +100,11 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		return err
 	}
 	_, err = tx.ExecContext(ctx, queryTb3)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	_, err = tx.ExecContext(ctx, queryTb4)
 	if err != nil {
 		tx.Rollback()
 		return err

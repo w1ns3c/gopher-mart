@@ -11,7 +11,8 @@ var (
 	CookieName          string        // = "jwt"
 	CookieHoursLifeTime time.Duration // =  time.Hour * 4
 	// DB tables names
-	TableUsers   string // = "users"
-	TableOrders  string // = "orders"
-	TableBalance string // = "balance"
+	TableUsers     string // = "users"
+	TableOrders    string // = "orders"
+	TableBalance   string // = "balance"
+	TableWithdraws string // = "withdraws"
 )
