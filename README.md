@@ -1,4 +1,4 @@
-# gopher-mart
+# Gopher mart
 It's yandex Go-programmer graduation project
 
 ## Setup
