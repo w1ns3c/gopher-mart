@@ -11,7 +11,7 @@ import (
 
 func (pg *PostgresRepo) UpdateAccrual(ctx context.Context, accrual *accruals.Accrual) error {
 	var (
-		query = fmt.Sprintf("UPDATE %s SET status=$1, accrual=$2, "+
+		query = fmt.Sprintf("UPDATE %s SET status=$1, accrual=$2 "+
 			"where orderid=$3", domain.TableOrders)
 	)
 

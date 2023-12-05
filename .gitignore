@@ -6,8 +6,7 @@ profile
 
 .env
 tests.md
-gopher-mart
-gophermart
+build
 main
 server
 cmd/filler.go

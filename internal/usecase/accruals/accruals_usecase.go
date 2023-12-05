@@ -82,7 +82,13 @@ func (u *Usecase) CheckAccruals(ctx context.Context) {
 		ordersCh := make(chan string)
 
 		// get orders ID from DB
-		go u.GetProcessingOrders(ctx, ordersCh)
+		go func() {
+			err := u.GetProcessingOrders(ctx, ordersCh)
+			if err != nil {
+				log.Error().Err(err).Send()
+			}
+
+		}()
 		accrualsCh := u.GetAccrualsFromRemote(ctx, ordersCh)
 		go u.SaveAccruals(ctx, accrualsCh)
 	}
@@ -91,6 +97,7 @@ func (u *Usecase) CheckAccruals(ctx context.Context) {
 
 func (u *Usecase) SaveAccruals(ctx context.Context, ch chan *accruals.Accrual) {
 	for accrual := range ch {
+		log.Info().Msg("Update accruals")
 		err := u.repo.UpdateAccrual(ctx, accrual)
 		if err != nil {
 			log.Error().Err(err).Send()
@@ -104,6 +111,7 @@ func (u *Usecase) GetProcessingOrders(ctx context.Context, ordersCh chan string)
 	if err != nil {
 		return err
 	}
+	log.Info().Int("orders", len(ordersSl)).Send()
 	go func(ordersSl []string) {
 		for _, order := range ordersSl {
 			ordersCh <- order
@@ -131,7 +139,7 @@ func (u *Usecase) accrualWorker(ctx context.Context, workerID uint,
 			// TODO Add retryableErrors
 			return u.createRequest(ctx, orderID, accrualsCh)
 		},
-			u.Attempts, locerrors.ErrTooManyRequests)
+			u.Attempts, u.timer, locerrors.ErrTooManyRequests, locerrors.ErrOrderNotRegisteredInRemote)
 	}
 
 }
@@ -139,9 +147,11 @@ func (u *Usecase) accrualWorker(ctx context.Context, workerID uint,
 func (u *Usecase) createRequest(ctx context.Context, orderID string,
 	accrualsCh chan *accruals.Accrual) error {
 
-	url := fmt.Sprintf("%s/%s", u.Addr, orderID)
+	url := fmt.Sprintf("%s/api/orders/%s", u.Addr, orderID)
+	log.Info().Str("url", url).Send()
 	resp, err := http.Get(url)
 	if err != nil {
+		log.Error().Err(fmt.Errorf("http connection")).Send()
 		return err
 	}
 	defer resp.Body.Close()
@@ -149,21 +159,32 @@ func (u *Usecase) createRequest(ctx context.Context, orderID string,
 	if resp.StatusCode == http.StatusTooManyRequests {
 		return locerrors.ErrTooManyRequests
 	}
+	if resp.StatusCode == http.StatusNoContent {
+		return locerrors.ErrOrderNotRegisteredInRemote
+	}
+
 	newAccrual := new(accruals.Accrual)
 	err = json.NewDecoder(resp.Body).Decode(&newAccrual)
+	if err != nil {
+		log.Error().Err(fmt.Errorf("json error"))
+		return err
+	}
+	data, err := json.Marshal(newAccrual)
 	if err != nil {
 		return err
 	}
 
+	log.Info().Bytes("accrual", data).Send()
 	// all successful
 	accrualsCh <- newAccrual
 	return nil
 }
 
-func retry(f func() error, attempts uint, retryableErrors ...error) {
+func retry(f func() error, attempts uint, retryTime time.Duration, retryableErrors ...error) {
 	for i := uint(0); i < attempts; i++ {
 		err := f()
 		if err != nil {
+			log.Error().Err(err).Send()
 			for _, e := range retryableErrors {
 				if errors.Is(err, e) {
 					time.Sleep(time.Second * 90)
