@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain"
 	"os"
 	"strconv"
@@ -57,10 +58,20 @@ func LoadConfig() (config *Config, err error) {
 
 	err = LoadEnvfileConfig(config)
 	if err != nil {
-		return nil, err
+		log.Error().Err(err).Msg("set default values")
+
+		// set default values
+		config.Secret = domain.Secret
+		config.LogLevel = domain.LogLevel
+
+		config.CookieName = domain.CookieName
+		config.CookieHoursLifeTime = domain.CookieHoursLifeTime
+		config.WorkersCount = domain.WorkersCount
+		config.RetryAttempts = domain.RetryAttempts
+		config.RetryTimer = domain.RetryTimer
 	}
 
-	return config, err
+	return config, nil
 }
 
 func LoadEnvfileConfig(config *Config) error {
@@ -77,7 +88,7 @@ func LoadEnvfileConfig(config *Config) error {
 	if exists {
 		config.LogLevel = logLvl
 	} else {
-		config.LogLevel = domain.CookieName
+		config.LogLevel = domain.LogLevel
 	}
 
 	// tables

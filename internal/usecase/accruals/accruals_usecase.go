@@ -76,10 +76,15 @@ func WithTimer(timer time.Duration) func(u *Usecase) {
 
 func (u *Usecase) CheckAccruals(ctx context.Context) {
 	ticker := time.NewTicker(u.timer)
+	ordersCh := make(chan string)
+	defer close(ordersCh)
+
+	// start workers pool
+	accrualsCh := u.GetAccrualsFromRemote(ctx, ordersCh)
+	defer close(accrualsCh)
 
 	for range ticker.C {
 		log.Info().Msg("Requesting accruals")
-		ordersCh := make(chan string)
 
 		// get orders ID from DB
 		go func() {
@@ -89,7 +94,6 @@ func (u *Usecase) CheckAccruals(ctx context.Context) {
 			}
 
 		}()
-		accrualsCh := u.GetAccrualsFromRemote(ctx, ordersCh)
 		go u.SaveAccruals(ctx, accrualsCh)
 	}
 
@@ -111,6 +115,10 @@ func (u *Usecase) GetProcessingOrders(ctx context.Context, ordersCh chan string)
 	if err != nil {
 		return err
 	}
+	if len(ordersSl) == 0 {
+		return nil
+	}
+
 	log.Info().Int("orders", len(ordersSl)).Send()
 	go func(ordersSl []string) {
 		for _, order := range ordersSl {
@@ -120,6 +128,7 @@ func (u *Usecase) GetProcessingOrders(ctx context.Context, ordersCh chan string)
 	return nil
 }
 
+// GetAccrualsFromRemote start workers
 func (u *Usecase) GetAccrualsFromRemote(ctx context.Context,
 	ordersID chan string) chan *accruals.Accrual {
 
@@ -135,16 +144,23 @@ func (u *Usecase) accrualWorker(ctx context.Context, workerID uint,
 	ordersID chan string, accrualsCh chan *accruals.Accrual) {
 
 	for orderID := range ordersID {
-		retry(func() error {
-			// TODO Add retryableErrors
-			return u.createRequest(ctx, orderID, accrualsCh)
-		},
-			u.Attempts, u.timer, locerrors.ErrTooManyRequests, locerrors.ErrOrderNotRegisteredInRemote)
+		log.Info().Uint("id", workerID).Msg("worker get job")
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			retry(func() error {
+				// TODO Add retryableErrors
+				return u.createRequest(orderID, accrualsCh)
+			},
+				u.Attempts, u.timer, locerrors.ErrTooManyRequests, locerrors.ErrOrderNotRegisteredInRemote)
+		}
+
 	}
 
 }
 
-func (u *Usecase) createRequest(ctx context.Context, orderID string,
+func (u *Usecase) createRequest(orderID string,
 	accrualsCh chan *accruals.Accrual) error {
 
 	url := fmt.Sprintf("%s/api/orders/%s", u.Addr, orderID)
@@ -187,7 +203,7 @@ func retry(f func() error, attempts uint, retryTime time.Duration, retryableErro
 			log.Error().Err(err).Send()
 			for _, e := range retryableErrors {
 				if errors.Is(err, e) {
-					time.Sleep(time.Second * 90)
+					time.Sleep(retryTime)
 					continue
 				}
 			}
