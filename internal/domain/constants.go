@@ -9,7 +9,7 @@ var (
 	// variables from .env config file
 	Secret              string        = "topsecret"
 	LogLevel            string        = "DEBUG"
-	CookieName          string        = "jwt"
+	CookieName          string        = "token"
 	CookieHoursLifeTime time.Duration = time.Hour * 4
 
 	WorkersCount  uint          = 4

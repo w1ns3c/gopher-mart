@@ -10,3 +10,4 @@ build
 main
 server
 cmd/filler.go
+Makefile

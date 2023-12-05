@@ -21,7 +21,7 @@ func NewRegisterHandler(registerUsecase registerUsecase) *RegisterHandler {
 }
 
 type registerUsecase interface {
-	RegisterUser(ctx context.Context, user *users.User) error
+	RegisterUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error)
 }
 
 type reqisterRequest struct {
@@ -69,7 +69,7 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.usecase.RegisterUser(r.Context(), user)
+	cookie, err := h.usecase.RegisterUser(r.Context(), user)
 	if err != nil {
 		log.Err(err).Send()
 		switch err {
@@ -88,5 +88,6 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Set-Cookie", cookie.String())
 	w.Write([]byte("OK"))
 }

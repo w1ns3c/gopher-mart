@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/config"
 	"gopher-mart/internal/logger"
@@ -14,12 +15,14 @@ func main() {
 
 	conf, err := config.LoadConfig()
 	if err != nil {
+		fmt.Println(err)
 		log.Fatal().Err(err).Send()
 		return
 	}
 
 	err = logger.Initialize(conf.LogLevel)
 	if err != nil {
+		fmt.Println(err)
 		log.Fatal().Err(err).Send()
 		return
 	}
@@ -32,10 +35,12 @@ func main() {
 	// init repository
 	repo, err := postgres.NewRepository(conf.DBurl, ctx)
 	if err != nil {
+		fmt.Println(err)
 		log.Error().Err(err).Msg("Repo init: ")
 		return
 	}
 
+	fmt.Println(conf)
 	// init usecases
 	market := gophermart.NewGophermart(
 		gophermart.WithRepo(repo),

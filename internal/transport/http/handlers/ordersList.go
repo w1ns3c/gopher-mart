@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/orders"
@@ -36,7 +35,6 @@ type ordersResponse struct {
 
 func (r *ordersResponse) MarshalJSON() ([]byte, error) {
 	type Alias ordersResponse
-	fmt.Println("here")
 	if r.Date.IsZero() {
 		return json.Marshal(&struct {
 			*Alias

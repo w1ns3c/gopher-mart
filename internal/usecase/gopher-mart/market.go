@@ -195,7 +195,7 @@ func (g *GopherMart) LoginUser(ctx context.Context, user *users.User) (cookie *h
 	return g.users.LoginUser(ctx, user)
 }
 
-func (g *GopherMart) RegisterUser(ctx context.Context, user *users.User) error {
+func (g *GopherMart) RegisterUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error) {
 	return g.users.RegisterUser(ctx, user)
 }
 

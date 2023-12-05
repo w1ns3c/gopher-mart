@@ -14,7 +14,7 @@ import (
 
 type UserUsecaseInf interface {
 	LoginUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error)
-	RegisterUser(ctx context.Context, user *users.User) error
+	RegisterUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error)
 
 	GetUserWithdrawals(ctx context.Context, user *users.User) (wd []withdraws.Withdraw, err error)
 	UserBalanceUsecase
@@ -95,13 +95,17 @@ func (u *Usecase) LoginUser(ctx context.Context,
 	return utils.CreateJWTcookie(user.ID, u.Secret, u.CookieLifeTime, u.CookieName)
 }
 
-func (u *Usecase) RegisterUser(ctx context.Context, user *users.User) error {
-	err := user.GenerateHash(u.Secret)
+func (u *Usecase) RegisterUser(ctx context.Context, user *users.User) (cookie *http.Cookie, err error) {
+	err = user.GenerateHash(u.Secret)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	user.GenerateID(u.Secret)
-	return u.repo.RegisterUser(ctx, user)
+	err = u.repo.RegisterUser(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return utils.CreateJWTcookie(user.ID, u.Secret, u.CookieLifeTime, u.CookieName)
 }
 
 func (u *Usecase) GetUserWithdrawals(ctx context.Context,
