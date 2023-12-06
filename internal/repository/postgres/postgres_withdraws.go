@@ -14,18 +14,20 @@ import (
 
 func (pg *PostgresRepo) WithdrawBonuses(ctx context.Context, user *users.User, withdraw *withdraws.Withdraw) error {
 	var (
-		query = fmt.Sprintf("UPDATE %s SET withdraw = $1, processed_at = $2 "+
-			"where orderid = $3 and userid = $4 and withdraw is NULL",
-			domain.TableWithdraws)
+		queryWithdraws = fmt.Sprintf("INSERT INTO %s (orderid, userid, withdraw, processed_at) "+
+			"values ($1, $2, $3, $4)", domain.TableWithdraws)
+		//query = fmt.Sprintf("INSERT INTO %s SET withdraw = $1, processed_at = $2 "+
+		//	"where orderid = $3 and userid = $4 and withdraw is NULL",
+		//	domain.TableWithdraws)
 	)
 	now := time.Now()
-	rows, err := pg.db.ExecContext(ctx, query, withdraw.Sum, now, withdraw.OrderID, user.ID)
+	rows, err := pg.db.ExecContext(ctx, queryWithdraws, withdraw.OrderID, user.ID, withdraw.Sum, now)
 	if err != nil {
 		return err
 	}
 	count, err := rows.RowsAffected()
 	log.Warn().Int64("rows", count).Str("order", withdraw.OrderID).Send()
-	fmt.Println(query)
+	fmt.Println(queryWithdraws)
 	// order not updated
 	if count != 1 {
 		return errors.ErrOrderWrongFormat

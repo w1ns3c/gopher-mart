@@ -15,8 +15,8 @@ func (pg *PostgresRepo) AddOrder(ctx context.Context, user *users.User, orderNum
 	var (
 		queryOrders = fmt.Sprintf("INSERT INTO %s (orderid, userid, status, upload_date) "+
 			"values ($1, $2, $3, $4)", domain.TableOrders)
-		queryWithdraws = fmt.Sprintf("INSERT INTO %s (orderid, userid) "+
-			"values ($1, $2)", domain.TableWithdraws)
+		//queryWithdraws = fmt.Sprintf("INSERT INTO %s (orderid, userid) "+
+		//	"values ($1, $2)", domain.TableWithdraws)
 	)
 
 	now := time.Now()
@@ -28,14 +28,14 @@ func (pg *PostgresRepo) AddOrder(ctx context.Context, user *users.User, orderNum
 	_, err = tx.ExecContext(ctx, queryOrders, orderNumber, user.ID,
 		orders.StatusNew, now)
 	if err != nil {
-		tx.Rollback()
+		defer tx.Rollback()
 		return err
 	}
-	_, err = tx.ExecContext(ctx, queryWithdraws, orderNumber, user.ID)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	//_, err = tx.ExecContext(ctx, queryWithdraws, orderNumber, user.ID)
+	//if err != nil {
+	//	tx.Rollback()
+	//	return err
+	//}
 
 	return tx.Commit()
 }
