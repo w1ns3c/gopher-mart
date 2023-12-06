@@ -29,7 +29,7 @@ type ordersListUsecase interface {
 type ordersResponse struct {
 	ID      string             `json:"number"`
 	Status  orders.OrderStatus `json:"status,omitempty"`
-	Accrual uint64             `json:"accrual,omitempty"` // accrual
+	Accrual float64            `json:"accrual,omitempty"` // accrual
 	Date    time.Time          `json:"-"`
 }
 
@@ -52,6 +52,7 @@ func (r *ordersResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
 	user, err := h.usecase.CheckUserInContext(r.Context())
 	if err != nil {
 		log.Err(err).Send()
@@ -87,7 +88,6 @@ func (h *ordersListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resp[id].Date = order.Date
 	}
 
-	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
 		log.Err(err).Send()

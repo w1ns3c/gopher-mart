@@ -164,7 +164,7 @@ func (u *Usecase) createRequest(orderID string,
 	accrualsCh chan *accruals.Accrual) error {
 
 	url := fmt.Sprintf("%s/api/orders/%s", u.Addr, orderID)
-	log.Info().Str("url", url).Send()
+	log.Info().Str("url", url).Msg("Accrual request")
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Error().Err(fmt.Errorf("http connection")).Send()
@@ -173,10 +173,12 @@ func (u *Usecase) createRequest(orderID string,
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusTooManyRequests {
-		return locerrors.ErrTooManyRequests
+		return fmt.Errorf("orderid=%s, status=%d, err=%v",
+			orderID, resp.StatusCode, locerrors.ErrTooManyRequests)
 	}
 	if resp.StatusCode == http.StatusNoContent {
-		return locerrors.ErrOrderNotRegisteredInRemote
+		return fmt.Errorf("orderid=%s, status=%d, err=%v",
+			orderID, resp.StatusCode, locerrors.ErrTooManyRequests)
 	}
 
 	newAccrual := new(accruals.Accrual)
@@ -200,10 +202,10 @@ func retry(f func() error, attempts uint, retryTime time.Duration, retryableErro
 	for i := uint(0); i < attempts; i++ {
 		err := f()
 		if err != nil {
-			log.Error().Err(err).Send()
+			log.Error().Str("key", "retry").Err(err).Send()
 			for _, e := range retryableErrors {
 				if errors.Is(err, e) {
-					time.Sleep(retryTime)
+					time.Sleep(time.Second * 60)
 					continue
 				}
 			}

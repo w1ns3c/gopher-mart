@@ -68,8 +68,8 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 
 	queryTb2 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ("+
 		"userid varchar primary KEY,"+
-		"balance integer NULL,"+
-		"withdraw integer NULL,"+
+		"balance float NULL,"+
+		"withdraw float NULL,"+
 		"CONSTRAINT balance_fk FOREIGN KEY (userid) REFERENCES public.%s(userid));",
 		domain.TableBalance, domain.TableBalance)
 
@@ -77,7 +77,7 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 		"(orderid varchar primary KEY,"+
 		"userid varchar NOT NULL,"+
 		"status varchar ,"+
-		"accrual integer,"+
+		"accrual float,"+
 		"upload_date timestamptz not NULL,"+
 		"CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.%s(orderid));",
 		domain.TableOrders, domain.TableOrders)
@@ -85,7 +85,7 @@ func (pg *PostgresRepo) Init(ctx context.Context) error {
 	queryTb4 := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ("+
 		"orderid varchar primary KEY,"+
 		"userid varchar NOT NULL,"+
-		"withdraw integer,"+
+		"withdraw float,"+
 		"processed_at timestamptz,"+
 		"CONSTRAINT orders_fk FOREIGN KEY (orderid) REFERENCES public.%s(orderid));", domain.TableWithdraws, domain.TableWithdraws)
 

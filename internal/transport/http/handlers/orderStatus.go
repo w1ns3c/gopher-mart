@@ -27,7 +27,7 @@ type getOrderStatusUsecase interface {
 
 type OrderResponse struct {
 	ID      string                           `json:"order"`
-	Accrual uint64                           `json:"accrual,omitempty"`
+	Accrual float64                          `json:"accrual,omitempty"`
 	Status  accruals.AccrualSystemRegistered `json:"status"`
 }
 

@@ -12,8 +12,8 @@ var (
 	CookieName          string        = "token"
 	CookieHoursLifeTime time.Duration = time.Hour * 4
 
-	WorkersCount  uint          = 4
-	RetryTimer    time.Duration = time.Second * 10
+	WorkersCount  uint          = 2
+	RetryTimer    time.Duration = time.Second * 2
 	RetryAttempts uint          = 2
 
 	// DB tables names

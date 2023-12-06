@@ -4,23 +4,12 @@ import (
 	"time"
 )
 
-type Item struct {
-	ItemID   string
-	ItemCost uint64
-}
-
-type Position struct {
-	Item  Item
-	Count uint64
-}
-
 type Order struct {
-	ID        string
-	Sum       float64
-	Positions []Position
-	Cashback  uint64
-	Date      time.Time
-	Status    OrderStatus
+	ID       string
+	Sum      float64
+	Cashback float64
+	Date     time.Time
+	Status   OrderStatus
 }
 
 type OrderStatus string

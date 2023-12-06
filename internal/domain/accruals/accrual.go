@@ -3,9 +3,9 @@ package accruals
 import "strings"
 
 type Accrual struct {
-	Order   string `json:"order"`
-	Status  string `json:"status"`
-	Accrual int    `json:"accrual"`
+	Order   string  `json:"order"`
+	Status  string  `json:"status"`
+	Accrual float64 `json:"accrual"`
 }
 
 type AccrualSystemRegistered string

@@ -58,7 +58,7 @@ func (pg *PostgresRepo) GetUserOrders(ctx context.Context, user *users.User) (re
 			order    orders.Order
 			date     sql.NullString
 			status   sql.NullString
-			cashback sql.NullInt32
+			cashback sql.NullFloat64
 		)
 
 		err = rows.Scan(&order.ID, &status, &cashback, &date)
@@ -75,7 +75,7 @@ func (pg *PostgresRepo) GetUserOrders(ctx context.Context, user *users.User) (re
 		}
 		order.Status = orders.OrderStatus(status.String)
 		// TODO maybe, should use another type (conversion int32 in uint64)
-		order.Cashback = uint64(cashback.Int32)
+		order.Cashback = cashback.Float64
 
 		result = append(result, order)
 	}
