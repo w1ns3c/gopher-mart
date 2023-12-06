@@ -121,8 +121,8 @@ func (pg *PostgresRepo) CheckUserExist(ctx context.Context, userID string) (user
 		return nil, rerr
 	}
 	// Rows.Err will report the last error encountered by Rows.Scan.
-	if err := rows.Err(); err != nil {
-		return nil, rerr
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	if len(result) != 1 {

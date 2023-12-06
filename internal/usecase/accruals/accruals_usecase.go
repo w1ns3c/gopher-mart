@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain/accruals"
 	locerrors "gopher-mart/internal/domain/errors"
+	"gopher-mart/internal/domain/users"
 	"gopher-mart/internal/repository"
 	"net/http"
 	"time"
@@ -101,11 +102,36 @@ func (u *Usecase) CheckAccruals(ctx context.Context) {
 
 func (u *Usecase) SaveAccruals(ctx context.Context, ch chan *accruals.Accrual) {
 	for accrual := range ch {
-		log.Info().Msg("Update accruals")
+		log.Info().Msg("Updating accruals")
 		err := u.repo.UpdateAccrual(ctx, accrual)
 		if err != nil {
+			err = fmt.Errorf("can't update accrual: %v", err)
 			log.Error().Err(err).Send()
+			continue
+
 		}
+		userID, err := u.repo.GetUserByOrderID(ctx, accrual.Order)
+		if err != nil {
+			err = fmt.Errorf("can't get userID by orderID: %v", err)
+			log.Error().Err(err).Send()
+			continue
+		}
+		user := &users.User{ID: userID}
+		balance, err := u.repo.CheckBalance(ctx, user)
+		if err != nil {
+			err = fmt.Errorf("can't get user balance: %v", err)
+			log.Error().Err(err).Send()
+			continue
+		}
+
+		balance.Current += accrual.Accrual
+		err = u.repo.UpdateBalance(ctx, user, balance)
+		if err != nil {
+			err = fmt.Errorf("can't update balance with accrual: %v", err)
+			log.Error().Err(err).Send()
+			continue
+		}
+
 	}
 	log.Info().Str("status", "closed").Msg("DB")
 }
@@ -147,6 +173,7 @@ func (u *Usecase) accrualWorker(ctx context.Context, workerID uint,
 		log.Info().Uint("id", workerID).Msg("worker get job")
 		select {
 		case <-ctx.Done():
+			log.Warn().Uint("id", workerID).Msg("worker stopped")
 			return
 		default:
 			retry(func() error {

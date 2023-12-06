@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
@@ -23,7 +24,8 @@ func (pg *PostgresRepo) WithdrawBonuses(ctx context.Context, user *users.User, w
 		return err
 	}
 	count, err := rows.RowsAffected()
-	//log.Info().Int64("rows", count).Send()
+	log.Warn().Int64("rows", count).Str("order", withdraw.OrderID).Send()
+	fmt.Println(query)
 	// order not updated
 	if count != 1 {
 		return errors.ErrOrderWrongFormat

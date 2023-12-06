@@ -13,7 +13,7 @@ var (
 	CookieHoursLifeTime time.Duration = time.Hour * 4
 
 	WorkersCount  uint          = 2
-	RetryTimer    time.Duration = time.Second * 2
+	RetryTimer    time.Duration = time.Second * 4
 	RetryAttempts uint          = 2
 
 	// DB tables names

@@ -36,10 +36,19 @@ type UsersRepoInf interface {
 
 type BalanceRepoInf interface {
 	CheckBalance(ctx context.Context, user *users.User) (balance *users.Balance, err error)
+	BalanceUpdInf
+}
+type BalanceUpdInf interface {
 	UpdateBalance(ctx context.Context, user *users.User, balance *users.Balance) error
 }
 
 type AccrualsRepoInf interface {
 	UpdateAccrual(ctx context.Context, accrual *accruals.Accrual) error
 	GetProccessingOrders(ctx context.Context) (ordersID []string, err error)
+	CheckingUserInf
+	BalanceRepoInf
+}
+
+type CheckingUserInf interface {
+	GetUserByOrderID(ctx context.Context, orderID string) (userID string, err error)
 }

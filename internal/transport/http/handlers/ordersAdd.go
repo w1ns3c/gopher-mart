@@ -60,7 +60,7 @@ func (h *OrdersAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case errors.ErrOrderCreatedByAnother:
 			w.WriteHeader(http.StatusConflict)
 		case errors.ErrOrderWrongFormat:
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusUnprocessableEntity)
 		}
 		return
 	}

@@ -2,6 +2,7 @@ package gophermart
 
 import (
 	"context"
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/config"
 	"gopher-mart/internal/domain/accruals"
@@ -243,7 +244,9 @@ func (g *GopherMart) WithdrawUserBonuses(ctx context.Context, user *users.User, 
 	// 3.1 save withdraw for order
 	err = g.repo.WithdrawBonuses(ctx, user, withdraw)
 	if err != nil {
-		//log.Error().Err(err).Send()
+		fmt.Println()
+		log.Error().Err(err).Send()
+		fmt.Println()
 		return errors.ErrOrderWrongFormat
 	}
 

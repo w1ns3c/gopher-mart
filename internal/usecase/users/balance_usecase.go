@@ -7,6 +7,10 @@ import (
 
 type UserBalanceUsecase interface {
 	CheckBalance(ctx context.Context, user *users.User) (balance *users.Balance, err error)
+	UserBalanceUpdateInf
+}
+
+type UserBalanceUpdateInf interface {
 	UpdateBalance(ctx context.Context, user *users.User, balance *users.Balance) error
 }
 

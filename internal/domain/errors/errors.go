@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 	// order status errors
 	ErrOrderNotFound              = errors.New("order not found in accounting system")
 	ErrAccrualsNotUpdated         = errors.New("accruals info not updated")
+	ErrAlreadyUpdated             = fmt.Errorf("maybe, already updated, %v", ErrAccrualsNotUpdated)
 	ErrTooManyRequests            = errors.New("too many requests")
 	ErrOrderNotRegisteredInRemote = errors.New("order is not registered in accruals system")
 

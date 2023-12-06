@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain/errors"
 	"gopher-mart/internal/domain/users"
@@ -64,6 +65,9 @@ func (h *balanceWithdrawHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 
 	if !utils.LuhnValidator(req.OrderID) {
+		fmt.Println()
+		log.Warn().Str("id", req.OrderID)
+		fmt.Println()
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
