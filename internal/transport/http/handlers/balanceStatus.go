@@ -23,8 +23,8 @@ type balanceUsecase interface {
 	usecaseUsers.UserContextUsecase
 }
 type responseBalance struct {
-	Current   uint64 `json:"current"`
-	Withdrawn uint64 `json:"withdrawn"`
+	Current   float64 `json:"current"`
+	Withdrawn float64 `json:"withdrawn"`
 }
 
 func (h *BalanceStatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

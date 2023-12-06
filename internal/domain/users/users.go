@@ -43,9 +43,7 @@ func (u *User) GenerateID(salt string) {
 	u.ID = hex.EncodeToString(hash[:])
 }
 
-
-
 type Balance struct {
-	Current      uint64
-	WithdrawsSum uint64
+	Current      float64
+	WithdrawsSum float64
 }

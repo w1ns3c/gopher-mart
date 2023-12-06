@@ -26,7 +26,7 @@ type withdrawalsUsecase interface {
 }
 type responseWithdrawls struct {
 	OrderID string    `json:"order"`
-	Sum     uint64    `json:"sum"`
+	Sum     float64   `json:"sum"`
 	Date    time.Time `json:"-"`
 }
 

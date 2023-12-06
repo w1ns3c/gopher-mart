@@ -4,6 +4,6 @@ import "time"
 
 type Withdraw struct {
 	OrderID string
-	Sum     uint64
+	Sum     float64
 	Date    time.Time
 }

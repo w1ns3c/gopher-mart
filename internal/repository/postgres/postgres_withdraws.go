@@ -48,7 +48,7 @@ func (pg *PostgresRepo) GetUserWithdrawals(ctx context.Context,
 	for rows.Next() {
 		var (
 			withdraw withdraws.Withdraw
-			cashback sql.NullInt32
+			cashback sql.NullFloat64
 			date     sql.NullString
 		)
 
@@ -66,7 +66,7 @@ func (pg *PostgresRepo) GetUserWithdrawals(ctx context.Context,
 		}
 
 		// TODO maybe, should use another type (conversion int32 in uint64)
-		withdraw.Sum = uint64(cashback.Int32)
+		withdraw.Sum = cashback.Float64
 
 		result = append(result, withdraw)
 	}

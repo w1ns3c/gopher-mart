@@ -26,8 +26,8 @@ type balanceWithdrawUsecase interface {
 }
 
 type withdrawRequest struct {
-	OrderID string `json:"order"`
-	Sum     uint64 `json:"sum"`
+	OrderID string  `json:"order"`
+	Sum     float64 `json:"sum"`
 }
 
 func (h *balanceWithdrawHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

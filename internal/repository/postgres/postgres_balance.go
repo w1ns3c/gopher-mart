@@ -8,48 +8,44 @@ import (
 	"gopher-mart/internal/domain/users"
 )
 
-func (pg *PostgresRepo) CheckBalance(ctx context.Context, user *users.User) (curBalance, withDraws uint64, err error) {
+func (pg *PostgresRepo) CheckBalance(ctx context.Context, user *users.User) (balance *users.Balance, err error) {
 	var (
-		query = fmt.Sprintf("SELECT userid, balance, withdraw FROM %s where userid=$1;", domain.TableBalance)
+		query = fmt.Sprintf("SELECT balance, withdraw FROM %s where userid=$1;", domain.TableBalance)
 	)
 
 	rows, err := pg.db.QueryContext(ctx, query, user.ID)
 	if err != nil {
-		return 0, 0, err
+		return nil, err
 	}
 	defer rows.Close()
-	type Balance struct {
-		ID        string
-		Current   uint64
-		Withdraws uint64
-	}
-	result := make([]Balance, 0)
+
+	result := make([]users.Balance, 0)
 	for rows.Next() {
 		var (
-			balance Balance
+			balance users.Balance
 		)
 
-		err := rows.Scan(&balance.ID, &balance.Current, &balance.Withdraws)
+		err := rows.Scan(&balance.Current, &balance.WithdrawsSum)
 		if err != nil {
-			return 0, 0, err
+			return nil, err
 		}
 		result = append(result, balance)
 	}
 
 	rerr := rows.Close()
 	if rerr != nil {
-		return 0, 0, rerr
+		return nil, rerr
 	}
 	// Rows.Err will report the last error encountered by Rows.Scan.
 	if err := rows.Err(); err != nil {
-		return 0, 0, rerr
+		return nil, rerr
 	}
 
 	if len(result) != 1 {
-		return 0, 0, errors.ErrWrongResultValues
+		return nil, errors.ErrWrongResultValues
 	}
 
-	return result[0].Current, result[0].Withdraws, nil
+	return &result[0], nil
 }
 
 func (pg *PostgresRepo) UpdateBalance(ctx context.Context, user *users.User, balance *users.Balance) error {

@@ -35,7 +35,7 @@ type UsersRepoInf interface {
 }
 
 type BalanceRepoInf interface {
-	CheckBalance(ctx context.Context, user *users.User) (curBalance, withDrawn uint64, err error)
+	CheckBalance(ctx context.Context, user *users.User) (balance *users.Balance, err error)
 	UpdateBalance(ctx context.Context, user *users.User, balance *users.Balance) error
 }
 
