@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain"
@@ -58,6 +59,7 @@ func LoadConfig() (config *Config, err error) {
 
 	err = LoadEnvfileConfig(config)
 	if err != nil {
+		fmt.Println("------------------------------------------------------------")
 		log.Error().Err(err).Msg("set default values")
 
 		// set default values

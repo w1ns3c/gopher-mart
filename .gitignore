@@ -11,3 +11,4 @@ main
 server
 cmd/filler.go
 Makefile
+cmd/gophermart/gophermart
