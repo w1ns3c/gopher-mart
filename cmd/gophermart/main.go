@@ -11,19 +11,28 @@ import (
 	gophermart "gopher-mart/internal/usecase/gopher-mart"
 )
 
+var (
+	pointString = `=================================================================================
+=================================================================================
+=================================================================================`
+	endPoint = `---------------------------------------------------------------------------------`
+)
+
 func main() {
 
 	conf, err := config.LoadConfig()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(pointString)
 		log.Fatal().Err(err).Send()
+		fmt.Println(endPoint)
 		return
 	}
 
 	err = logger.Initialize(conf.LogLevel)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(pointString)
 		log.Fatal().Err(err).Send()
+		fmt.Println(endPoint)
 		return
 	}
 
