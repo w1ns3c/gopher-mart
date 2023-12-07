@@ -8,7 +8,6 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rs/zerolog/log"
 	"gopher-mart/internal/domain"
-	"strings"
 )
 
 type PostgresRepo struct {
@@ -17,9 +16,6 @@ type PostgresRepo struct {
 }
 
 func NewRepository(dbURL string, ctx context.Context) (repo *PostgresRepo, err error) {
-	if !strings.Contains(dbURL, "postgres://") {
-		dbURL = "postgres://" + dbURL
-	}
 	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
 		return nil, err
