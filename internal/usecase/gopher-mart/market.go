@@ -288,5 +288,5 @@ func (g *GopherMart) Close() error {
 		return err
 	}
 	log.Info().Msg("DB closed")
-	return nil
+	return fmt.Errorf("gophermart usecase stopped")
 }

@@ -9,6 +9,9 @@ import (
 	"gopher-mart/internal/repository/postgres"
 	httpserver "gopher-mart/internal/transport/http"
 	gophermart "gopher-mart/internal/usecase/gopher-mart"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var (
@@ -21,36 +24,30 @@ var (
 func main() {
 
 	fmt.Println(pointString)
-	conf, err := config.LoadConfig()
-	if err != nil {
-		fmt.Println(pointString)
-		log.Fatal().Err(err).Send()
-		fmt.Println(endPoint)
-		return
-	}
 
-	err = logger.Initialize(conf.LogLevel)
+	conf := config.LoadConfig()
+	fmt.Println(conf)
+
+	err := logger.Initialize(conf.LogLevel)
 	if err != nil {
-		fmt.Println(pointString)
-		log.Fatal().Err(err).Send()
-		fmt.Println(endPoint)
+		log.Error().Err(err).Send()
 		return
 	}
 
 	// initialise all context, service, repo and transport server
 	// init context
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := signal.NotifyContext(context.Background(),
+		syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
 	// init repository
 	repo, err := postgres.NewRepository(conf.DBurl, ctx)
 	if err != nil {
-		fmt.Println(err)
 		log.Error().Err(err).Msg("Repo init: ")
 		return
 	}
 
-	fmt.Println(conf)
+	log.Info().Msg(fmt.Sprint(conf))
 	// init usecases
 	market := gophermart.NewGophermart(
 		gophermart.WithRepo(repo),
@@ -68,6 +65,16 @@ func main() {
 
 	// starting HTTP server
 	err = srv.Run(ctx)
-	log.Error().Err(err).Send()
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+	err = market.Close()
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+
+	<-ctx.Done()
+
+	log.Info().Msg("Gophermart stopped")
 
 }

@@ -7,8 +7,5 @@ profile
 .env
 tests.md
 build
-main
-server
 cmd/filler.go
 Makefile
-cmd/gophermart/gophermart

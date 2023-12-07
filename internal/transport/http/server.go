@@ -2,9 +2,11 @@ package httpserver
 
 import (
 	"context"
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"net"
 	"net/http"
+	"sync"
 )
 
 type HTTPServer struct {
@@ -24,8 +26,16 @@ func NewHTTPServer(address string, router http.Handler) (srv *HTTPServer, err er
 }
 
 func (srv *HTTPServer) Run(ctx context.Context) error {
+
 	log.Info().
 		Str("addr", srv.Addr).
 		Msg("Server started at:")
-	return srv.ListenAndServe()
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		srv.ListenAndServe()
+	}()
+	<-ctx.Done()
+	wg.Done()
+	return fmt.Errorf("HTTP server stoped")
 }

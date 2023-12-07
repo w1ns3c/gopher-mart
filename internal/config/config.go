@@ -24,14 +24,14 @@ type Config struct {
 	RetryAttempts       uint
 }
 
-func LoadConfig() (config *Config, err error) {
+func LoadConfig() *Config {
 	var (
 		envSrvAddr = os.Getenv("RUN_ADDRESS")
 		envDBurl   = os.Getenv("DATABASE_URI")
 		envRSAddr  = os.Getenv("ACCRUAL_SYSTEM_ADDRESS")
 	)
 
-	config = &Config{
+	config := &Config{
 		DBurl:             envDBurl,
 		SrvAddr:           envSrvAddr,
 		RemoteServiceAddr: envRSAddr,
@@ -57,7 +57,7 @@ func LoadConfig() (config *Config, err error) {
 		config.RemoteServiceAddr = flagRSAddr
 	}
 
-	err = LoadEnvfileConfig(config)
+	err := LoadEnvfileConfig(config)
 	if err != nil {
 		fmt.Println("------------------------------------------------------------")
 		log.Error().Err(err).Msg("set default values")
@@ -73,7 +73,7 @@ func LoadConfig() (config *Config, err error) {
 		config.RetryTimer = domain.RetryTimer
 	}
 
-	return config, nil
+	return config
 }
 
 func LoadEnvfileConfig(config *Config) error {

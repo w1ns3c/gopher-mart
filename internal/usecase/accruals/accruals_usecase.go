@@ -84,56 +84,65 @@ func (u *Usecase) CheckAccruals(ctx context.Context) {
 	accrualsCh := u.GetAccrualsFromRemote(ctx, ordersCh)
 	defer close(accrualsCh)
 
-	for range ticker.C {
-		log.Info().Msg("Requesting accruals")
+	for {
+		select {
+		case <-ticker.C:
+			log.Info().Msg("Requesting accruals")
 
-		// get orders ID from DB
-		go func() {
-			err := u.GetProcessingOrders(ctx, ordersCh)
-			if err != nil {
-				log.Error().Err(err).Send()
-			}
+			// get orders ID from DB
+			go func() {
+				err := u.GetProcessingOrders(ctx, ordersCh)
+				if err != nil {
+					log.Error().Err(err).Send()
+				}
+			}()
+			go u.SaveAccruals(ctx, accrualsCh)
+		case <-ctx.Done():
+			log.Info().Msg("accruals requests: closed")
+			return
+		}
 
-		}()
-		go u.SaveAccruals(ctx, accrualsCh)
 	}
-
 }
 
 func (u *Usecase) SaveAccruals(ctx context.Context, ch chan *accruals.Accrual) {
-	for accrual := range ch {
-		log.Info().Msg("Updating accruals")
-		err := u.repo.UpdateAccrual(ctx, accrual)
-		if err != nil {
-			err = fmt.Errorf("can't update accrual: %v", err)
-			log.Error().Err(err).Send()
-			continue
+	for {
+		select {
+		case accrual := <-ch:
+			log.Info().Msg("Updating accruals")
+			err := u.repo.UpdateAccrual(ctx, accrual)
+			if err != nil {
+				err = fmt.Errorf("can't update accrual: %v", err)
+				log.Error().Err(err).Send()
+				continue
+			}
+			userID, err := u.repo.GetUserByOrderID(ctx, accrual.Order)
+			if err != nil {
+				err = fmt.Errorf("can't get userID by orderID: %v", err)
+				log.Error().Err(err).Send()
+				continue
+			}
+			user := &users.User{ID: userID}
+			balance, err := u.repo.CheckBalance(ctx, user)
+			if err != nil {
+				err = fmt.Errorf("can't get user balance: %v", err)
+				log.Error().Err(err).Send()
+				continue
+			}
 
-		}
-		userID, err := u.repo.GetUserByOrderID(ctx, accrual.Order)
-		if err != nil {
-			err = fmt.Errorf("can't get userID by orderID: %v", err)
-			log.Error().Err(err).Send()
-			continue
-		}
-		user := &users.User{ID: userID}
-		balance, err := u.repo.CheckBalance(ctx, user)
-		if err != nil {
-			err = fmt.Errorf("can't get user balance: %v", err)
-			log.Error().Err(err).Send()
-			continue
-		}
-
-		balance.Current += accrual.Accrual
-		err = u.repo.UpdateBalance(ctx, user, balance)
-		if err != nil {
-			err = fmt.Errorf("can't update balance with accrual: %v", err)
-			log.Error().Err(err).Send()
-			continue
+			balance.Current += accrual.Accrual
+			err = u.repo.UpdateBalance(ctx, user, balance)
+			if err != nil {
+				err = fmt.Errorf("can't update balance with accrual: %v", err)
+				log.Error().Err(err).Send()
+				continue
+			}
+		case <-ctx.Done():
+			log.Info().Str("status", "closed").Msg("DB accrual queries")
+			return
 		}
 
 	}
-	log.Info().Str("status", "closed").Msg("DB")
 }
 
 func (u *Usecase) GetProcessingOrders(ctx context.Context, ordersCh chan string) error {
