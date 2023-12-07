@@ -20,6 +20,7 @@ var (
 
 func main() {
 
+	fmt.Println(pointString)
 	conf, err := config.LoadConfig()
 	if err != nil {
 		fmt.Println(pointString)
