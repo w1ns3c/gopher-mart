@@ -35,7 +35,6 @@ jobs:
         with:
           repository: Yandex-Practicum/go-autotests
           tag: "v0.9.16"
-#          latest: true
           fileName: "*"
           out-file-path: .tools
 
@@ -57,7 +56,7 @@ jobs:
             -test.v -test.run=^TestGophermart$ \
             -gophermart-binary-path=cmd/gophermart/gophermart \
             -gophermart-host=localhost \
-            -gophermart-port=8080 \
+            -gophermart-port=8000 \
             -gophermart-database-uri="postgresql://postgres:postgres@postgres/praktikum?sslmode=disable" \
             -accrual-binary-path=cmd/accrual/accrual_linux_amd64 \
             -accrual-host=localhost \
