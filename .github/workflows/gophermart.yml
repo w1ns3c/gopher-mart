@@ -47,12 +47,12 @@ jobs:
 
       - name: Prepare binaries
         run: |
-#          (cd cmd/gophermart && go build -buildvcs=false -o gophermart)
           (echo "compile-check=`cd cmd/gophermart && go build -buildvcs=false -o gophermart`" >> $GITHUB_OUTPUT)
           (cd cmd/accrual && chmod +x accrual_linux_amd64)
 
       - name: Test
         run: |
+          ls -al cmd/gophermart
           gophermarttest \
             -test.v -test.run=^TestGophermart$ \
             -gophermart-binary-path=cmd/gophermart/gophermart \
