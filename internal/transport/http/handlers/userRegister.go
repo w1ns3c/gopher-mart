@@ -78,8 +78,8 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		default:
 			if strings.Contains(err.Error(), "duplicate key value") {
-				w.Write([]byte("login is already used"))
 				w.WriteHeader(http.StatusConflict)
+				w.Write([]byte("login is already used"))
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
