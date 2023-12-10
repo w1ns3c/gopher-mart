@@ -15,11 +15,11 @@ import (
 )
 
 type currentBalanceMock struct {
-	all map[UserID]*users.Balance
+	all map[UserKey]*users.Balance
 }
 
 func (mock *currentBalanceMock) CheckBalance(ctx context.Context, user *users.User) (balance *users.Balance, err error) {
-	balance, ok := mock.all[UserID(user.ID)]
+	balance, ok := mock.all[UserKey(user.ID)]
 	if !ok {
 		return nil, fmt.Errorf("mock, user not exist")
 	}
@@ -27,8 +27,8 @@ func (mock *currentBalanceMock) CheckBalance(ctx context.Context, user *users.Us
 }
 
 func (mock *currentBalanceMock) CheckUserInContext(ctx context.Context) (user *users.User, err error) {
-	anyType := ctx.Value(domain.UserContextKey)
-	userID, ok := anyType.(UserID)
+	anyType := ctx.Value(UserKey(domain.UserContextKey))
+	userID, ok := anyType.(UserKey)
 	if !ok {
 		return nil, errors.ErrUserNotFoundInContext
 	}
@@ -37,11 +37,10 @@ func (mock *currentBalanceMock) CheckUserInContext(ctx context.Context) (user *u
 	return user, nil
 }
 
-type UserID string
 type UserKey string
 
 func TestBalanceStatusHandler_ServeHTTP(t *testing.T) {
-	users := map[UserID]*users.Balance{
+	users := map[UserKey]*users.Balance{
 		"userID1": {Current: 100, WithdrawsSum: 0},
 		"userID2": {Current: 100.222, WithdrawsSum: 11.356},
 		"userID3": {Current: 100, WithdrawsSum: 300},
@@ -93,7 +92,7 @@ func TestBalanceStatusHandler_ServeHTTP(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "http://localhost:8000", nil)
 			ctx := context.WithValue(context.Background(),
-				UserKey(domain.UserContextKey), UserID(tt.args.userID))
+				UserKey(domain.UserContextKey), UserKey(tt.args.userID))
 			req = req.WithContext(ctx)
 			resp := httptest.NewRecorder()
 			h.ServeHTTP(resp, req)

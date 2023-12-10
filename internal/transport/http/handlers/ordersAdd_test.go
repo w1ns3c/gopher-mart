@@ -141,6 +141,7 @@ func TestOrdersAddHandler_ServeHTTP(t *testing.T) {
 
 			h.ServeHTTP(resp, req)
 			result := resp.Result()
+			defer result.Body.Close()
 
 			if req.Header.Get("content-type") != "text/plain" {
 				assert.Equal(t, http.StatusBadRequest, result.StatusCode)
