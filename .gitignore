@@ -1,0 +1,11 @@
+.idea/
+vendor/
+profile
+*profile*
+*cover*
+
+.env
+tests.md
+build
+cmd/filler.go
+Makefile

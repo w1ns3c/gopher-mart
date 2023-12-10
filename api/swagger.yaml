@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  title: Swagger Gophermart - OpenAPI 3.0
+  description: |-
+    This is a API description for the Gophermart (yandex graduation project on Go course).
+    
+    It based on the Pet Store Server sample API file descriptor (OpenAPI 3.0 specification).  You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
+    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
+    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+
+    _If you're looking for the Swagger 2.0/OAS 2.0 version of Swagger OpenAPI file, then click [here](https://editor.swagger.io/?url=https://petstore.swagger.io/v2/swagger.yaml). Alternatively, you can load via the `Edit > Load Petstore OAS 2.0` menu option!_
+    
+    Some useful links:
+    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  termsOfService: http://swagger.io/terms/
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+paths:
+  /api/user/login:
+    post:
+      tags:
+        - user
+      summary: login user
+      requestBody:
+        description: Login registered user in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Successufl login
+        '400':
+          description: Wrong request format
+        '401':
+          description: Wrong user credentials
+        '500':
+          description: Internal server error
+
+  /api/user/register:
+    post:
+      tags:
+        - user
+      summary: register user
+      requestBody:
+        description: Create a new user account in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterRequest'
+        required: true
+      responses:
+        '200':
+          description: Successufl login
+        '400':
+          description: Wrong request format
+        '409':
+          description: Login already in use
+        '500':
+          description: Internal server error
+
+  /api/user/orders:
+    post:
+      tags:
+        - orders
+      summary: add new order
+      requestBody:
+        description: Create a new order account in the store
+        content:
+          text/plain:
+            schema:
+              type: string
+              format: uint64
+              example:
+                1234567890
+        required: true
+      responses:
+        '200':
+          description: Order was already uploaded by current user
+        '202':
+          description: New order number accept for handling
+        '400':
+          description: Wrong request format
+        '401':
+          description: User not authed
+        '409':
+          description: Order number was already upload by other user
+        '422':
+          description: Login already in use
+        '500':
+          description: Internal server error
+      security:
+        - gophermart_auth: []
+    get:
+      tags:
+        - orders
+      summary: list orders
+      description: List all orders for current user
+      responses:
+        '200':
+          description: List all orders for current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderStatus'
+        '204':
+          description: No content
+        '401':
+          description: User not authed
+        '500':
+          description: Internal server error
+      security:
+        - gophermart_auth: []
+
+  /api/user/balance:
+    get:
+      tags:
+        - withdraws
+      summary: user balance
+      description: Get current user balance
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current:
+                    type: number
+                    format: float64
+                    example: 500.5
+                  withdrawn:
+                    type: integer
+                    format: uint64
+                    example: 42
+        '401':
+          description: User not authed
+        '500':
+          description: Internal server error
+      security:
+        - gophermart_auth: []
+
+  /api/user/balance/withdraw:
+    post:
+      tags:
+        - withdraws
+      summary: order withdraw
+      description: Request withdraw for order
+      requestBody:
+        description: Create a new order account in the store
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: string
+                  example: 2377225624
+                sum:
+                  type: integer
+                  format: uint64
+                  example: 751
+        required: true
+      responses:
+        '200':
+          description: Successfull withdraw
+        '401':
+          description: User not authed
+        '402':
+          description: User doesn't have enough bonuses
+        '422':
+          description: Wrong order number
+        '500':
+          description: Internal server error
+      security:
+        - gophermart_auth: [ ]
+
+  /api/user/withdraws:
+    get:
+      tags:
+        - withdraws
+      summary: user balance
+      description: List all withdraws for current user
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    type: string
+                    format: uint64
+                    example: 2377225624
+                  sum:
+                    type: integer
+                    format: uint64
+                    example: 500
+                  processed_at:
+                    type: string
+                    format: RFC3339 timeformat
+                    example: 2020-12-09T16:09:57+03:00
+        '204':
+          description: user hasn't any withdraw yet
+        '401':
+          description: User not authed
+        '500':
+          description: Internal server error
+      security:
+        - gophermart_auth: []
+
+components:
+  schemas:
+    UserLoginRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          example: bob
+        password:
+          type: string
+          example: P@ssw0rd
+        confirm:
+          type: string
+          example: "P@ssw0rd"
+
+    UserRegisterRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          example: bob
+        password:
+          type: string
+          example: P@ssw0rd
+
+    OrderStatus:
+      type: object
+      properties:
+        number:
+          type: string
+          example: 12345678903
+        status:
+          type: string
+          enum:
+            - NEW
+            - PROCESSING
+            - INVALID
+            - PROCESSED
+
+  securitySchemes:
+    gophermart_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
