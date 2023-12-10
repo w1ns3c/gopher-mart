@@ -17,12 +17,12 @@ import (
 )
 
 type withdrawBalanceMock struct {
-	all map[UserID]*users.Balance
+	all map[UserKey]*users.Balance
 }
 
 func (m *withdrawBalanceMock) WithdrawUserBonuses(ctx context.Context,
 	user *users.User, wd *withdraws.Withdraw) error {
-	balance, ok := m.all[UserID(user.ID)]
+	balance, ok := m.all[UserKey(user.ID)]
 	if !ok {
 		return fmt.Errorf("user not found in mock")
 	}
@@ -38,8 +38,8 @@ func (m *withdrawBalanceMock) WithdrawUserBonuses(ctx context.Context,
 }
 
 func (m *withdrawBalanceMock) CheckUserInContext(ctx context.Context) (user *users.User, err error) {
-	anyType := ctx.Value(domain.UserContextKey)
-	userID, ok := anyType.(UserID)
+	anyType := ctx.Value(UserKey(domain.UserContextKey))
+	userID, ok := anyType.(UserKey)
 	if !ok {
 		return nil, errors.ErrUserNotFoundInContext
 	}
@@ -48,10 +48,8 @@ func (m *withdrawBalanceMock) CheckUserInContext(ctx context.Context) (user *use
 	return user, nil
 }
 
-type userKey string
-
 func Test_balanceWithdrawHandler_ServeHTTP(t *testing.T) {
-	users := map[UserID]*users.Balance{
+	users := map[UserKey]*users.Balance{
 		"userID1": {Current: 200.54, WithdrawsSum: 0},
 		"userID2": {Current: 100.222, WithdrawsSum: 11.356},
 		"userID3": {Current: 100, WithdrawsSum: 300},
@@ -135,7 +133,7 @@ func Test_balanceWithdrawHandler_ServeHTTP(t *testing.T) {
 			buf := bytes.NewBuffer(body)
 			req := httptest.NewRequest(http.MethodPost, "http://localhost:8000", buf)
 			ctx := context.WithValue(context.Background(),
-				UserID(domain.UserContextKey), UserID(tt.args.userID))
+				UserKey(domain.UserContextKey), UserKey(tt.args.userID))
 			req = req.WithContext(ctx)
 			req.Header.Set("content-type", "application/json")
 			resp := httptest.NewRecorder()
