@@ -105,7 +105,7 @@ func NewGophermart(options ...MartOptions) *GopherMart {
 	return market
 }
 
-func WithConfig(config *config.Config) func(mart *GopherMart) {
+func WithConfig(config *config.Config) MartOptions {
 	return func(mart *GopherMart) {
 		// optional params
 		mart.Secret = config.Secret
@@ -122,37 +122,37 @@ func WithConfig(config *config.Config) func(mart *GopherMart) {
 	}
 }
 
-func WithContext(ctx context.Context) func(mart *GopherMart) {
+func WithContext(ctx context.Context) MartOptions {
 	return func(mart *GopherMart) {
 		mart.ctx = ctx
 	}
 }
 
-func WithSecret(secret string) func(mart *GopherMart) {
+func WithSecret(secret string) MartOptions {
 	return func(mart *GopherMart) {
 		mart.Secret = secret
 	}
 }
 
-func WithCookieName(cookieName string) func(mart *GopherMart) {
+func WithCookieName(cookieName string) MartOptions {
 	return func(mart *GopherMart) {
 		mart.CookieName = cookieName
 	}
 }
 
-func WithCookieLifetime(lifetime time.Duration) func(mart *GopherMart) {
+func WithCookieLifetime(lifetime time.Duration) MartOptions {
 	return func(mart *GopherMart) {
 		mart.CookieLifetime = lifetime
 	}
 }
 
-func WithRepo(repo repository.Repository) func(mart *GopherMart) {
+func WithRepo(repo repository.Repository) MartOptions {
 	return func(mart *GopherMart) {
 		mart.repo = repo
 	}
 }
 
-func InitUsecases() func(mart *GopherMart) {
+func InitUsecases() MartOptions {
 	return func(mart *GopherMart) {
 		if mart.repo == nil {
 			log.Fatal().Err(errors.ErrRepoNotInit).Send()
